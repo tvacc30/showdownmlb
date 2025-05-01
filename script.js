@@ -1,10 +1,41 @@
 let currentSquare = null;
+
+// Initialize Firebase Database
 const db = firebase.database();
+
+// Get gameId from URL
+const urlParams = new URLSearchParams(window.location.search);
+const gameId = urlParams.get('gameId');
+
+// Check for gameId
+if (!gameId) {
+  alert("No game loaded — click 'Start New Game' to begin.");
+}
+
+// Reference for this game's data
+const gameRef = db.ref(`games/${gameId}`);
+
+// New Game Button functionality
+document.getElementById('newGameButton').addEventListener('click', () => {
+  const newGameRef = db.ref('games').push();
+  newGameRef.set({
+    home: 0,
+    away: 0,
+    boardState: Array(24).fill(null),
+    diceResults: {
+      dice1: null,
+      dice2: null
+    }
+  }).then(() => {
+    const newGameId = newGameRef.key;
+    window.location.href = `${window.location.pathname}?gameId=${newGameId}`;
+  });
+});
 
 // Upload image to a square and sync to Firebase
 function uploadImage(squareId) {
   currentSquare = document.getElementById(squareId);
-  document.getElementById('fileInput').dataset.squareId = squareId; // store square id on file input
+  document.getElementById('fileInput').dataset.squareId = squareId;
   document.getElementById('fileInput').click();
 }
 
@@ -17,25 +48,23 @@ function handleImage(event) {
     const imgData = e.target.result;
     const squareId = event.target.dataset.squareId;
 
-    // Create image element
     const img = document.createElement("img");
     img.src = imgData;
     img.classList.add("draggable");
     makeDraggable(img);
 
-    // Clear existing content and add image locally
     const square = document.getElementById(squareId);
     square.innerHTML = '';
     square.appendChild(img);
 
-    // Save image data to Firebase
-    db.ref(`squares/${squareId}`).set(imgData);
+    // Save image to Firebase in this game
+    gameRef.child(`squares/${squareId}`).set(imgData);
   };
   reader.readAsDataURL(file);
 }
 
 function makeDraggable(element) {
-  element.onmousedown = function (event) {
+  element.onmousedown = function(event) {
     event.preventDefault();
     let shiftX = event.clientX - element.getBoundingClientRect().left;
     let shiftY = event.clientY - element.getBoundingClientRect().top;
@@ -57,25 +86,23 @@ function makeDraggable(element) {
 
     document.addEventListener('mousemove', onMouseMove);
 
-    element.onmouseup = function () {
+    element.onmouseup = function() {
       document.removeEventListener('mousemove', onMouseMove);
       element.onmouseup = null;
     };
   };
 
-  element.ondragstart = function () {
-    return false;
-  };
+  element.ondragstart = () => false;
 }
 
 // Roll dice and sync to Firebase
 function rollDice(diceId) {
   const result = Math.floor(Math.random() * 20) + 1;
-  db.ref(`diceResults/${diceId}`).set(result);
+  gameRef.child(`diceResults/${diceId}`).set(result);
 }
 
-// Listen for live dice updates from Firebase
-db.ref('diceResults').on('value', (snapshot) => {
+// Listen for live dice updates
+gameRef.child('diceResults').on('value', (snapshot) => {
   const results = snapshot.val();
   if (results) {
     if (results.dice1 !== undefined)
@@ -85,8 +112,8 @@ db.ref('diceResults').on('value', (snapshot) => {
   }
 });
 
-// Listen for image updates from Firebase
-db.ref('squares').on('value', (snapshot) => {
+// Listen for image updates
+gameRef.child('squares').on('value', (snapshot) => {
   const squares = snapshot.val();
   if (squares) {
     Object.keys(squares).forEach(squareId => {

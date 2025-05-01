@@ -9,11 +9,8 @@
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-    // TODO: Add SDKs for Firebase products that you want to use
-    // https://firebase.google.com/docs/web/setup#available-libraries
-  
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyD7EhkUYesUQySkFF51fga5SuGsAuN2d3A",
       authDomain: "showdown-7bc8f.firebaseapp.com",
@@ -23,16 +20,169 @@
       appId: "1:1098398901533:web:c4d33b0481c31330082df4",
       measurementId: "G-JF81S3F5WY"
     };
-  
-    // Initialize Firebase
+
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
+    const db = getDatabase(app);
+
+    let currentSquare = null;
+    let gameId = new URLSearchParams(window.location.search).get('gameId');
+    
+    // If no gameId in the URL, create a new game
+    if (!gameId) {
+      createNewGame();
+    } else {
+      joinGame(gameId);
+    }
+
+    // Create a new game
+    function createNewGame() {
+      const newGameRef = ref(db, 'games').push(); // generates a new unique game ID
+      gameId = newGameRef.key;
+
+      // Initialize game data
+      set(newGameRef, {
+        boardState: Array(24).fill(null),
+        diceResults: { dice1: null, dice2: null }
+      });
+
+      // Redirect to the new game URL
+      window.location.href = `https://tvacc30.github.io/showdownmlb/?gameId=${gameId}`;
+    }
+
+    // Join an existing game
+    function joinGame(gameId) {
+      // Listen for changes to the game state (boardState and diceResults)
+      const gameRef = ref(db, `games/${gameId}`);
+
+      // Update the board state in real-time
+      onValue(ref(gameRef, 'boardState'), (snapshot) => {
+        const boardState = snapshot.val();
+        if (boardState) {
+          boardState.forEach((imgData, index) => {
+            const square = document.getElementById(`B${index + 1}`);
+            if (imgData) {
+              const img = document.createElement("img");
+              img.src = imgData;
+              img.classList.add("draggable");
+              makeDraggable(img);
+              square.innerHTML = '';
+              square.appendChild(img);
+            }
+          });
+        }
+      });
+
+      // Update dice results in real-time
+      onValue(ref(gameRef, 'diceResults'), (snapshot) => {
+        const diceResults = snapshot.val();
+        if (diceResults) {
+          if (diceResults.dice1 !== null) {
+            document.getElementById('diceResult1').textContent = `Roll result: ${diceResults.dice1}`;
+          }
+          if (diceResults.dice2 !== null) {
+            document.getElementById('diceResult2').textContent = `Roll result: ${diceResults.dice2}`;
+          }
+        }
+      });
+    }
+
+    // Upload image to a square and sync to Firebase
+    function uploadImage(squareId) {
+      currentSquare = document.getElementById(squareId);
+      document.getElementById('fileInput').dataset.squareId = squareId; // store square id on file input
+      document.getElementById('fileInput').click();
+    }
+
+    // Handle image upload
+    function handleImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imgData = e.target.result;
+        const squareId = event.target.dataset.squareId;
+
+        // Create image element
+        const img = document.createElement("img");
+        img.src = imgData;
+        img.classList.add("draggable");
+        makeDraggable(img);
+
+        // Clear existing content and add image locally
+        const square = document.getElementById(squareId);
+        square.innerHTML = '';
+        square.appendChild(img);
+
+        // Save image data to Firebase
+        set(ref(db, `games/${gameId}/boardState/${squareId}`), imgData);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Make image draggable
+    function makeDraggable(element) {
+      element.onmousedown = function (event) {
+        event.preventDefault();
+        let shiftX = event.clientX - element.getBoundingClientRect().left;
+        let shiftY = event.clientY - element.getBoundingClientRect().top;
+
+        element.style.position = 'absolute';
+        element.style.zIndex = 1000;
+        document.body.appendChild(element);
+
+        moveAt(event.pageX, event.pageY);
+
+        function moveAt(pageX, pageY) {
+          element.style.left = pageX - shiftX + 'px';
+          element.style.top = pageY - shiftY + 'px';
+        }
+
+        function onMouseMove(event) {
+          moveAt(event.pageX, event.pageY);
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+
+        element.onmouseup = function () {
+          document.removeEventListener('mousemove', onMouseMove);
+          element.onmouseup = null;
+        };
+      };
+
+      element.ondragstart = function () {
+        return false;
+      };
+    }
+
+    // Roll dice and sync to Firebase
+    function rollDice(diceId) {
+      const result = Math.floor(Math.random() * 20) + 1;
+      set(ref(db, `games/${gameId}/diceResults/${diceId}`), result);
+    }
+
+    // New Game button functionality
+    function startNewGame() {
+      // Generate a new game ID and create the game data in Firebase
+      const newGameRef = ref(db, 'games').push(); // generates a new unique game ID
+      const newGameId = newGameRef.key;
+
+      // Initialize game data
+      set(newGameRef, {
+        boardState: Array(24).fill(null),
+        diceResults: { dice1: null, dice2: null }
+      });
+
+      // Redirect to the new game URL
+      window.location.href = `https://tvacc30.github.io/showdownmlb/?gameId=${newGameId}`;
+    }
   </script>
 
 </head>
 <body>
   <div class="placemat">
-
+    <button id="newGameButton" onclick="startNewGame()">New Game</button>
     <div class="top-grid">
       <div class="blue-square" id="B1" onclick="uploadImage('B1')">1</div>
       <div class="blue-square" id="B2" onclick="uploadImage('B2')">2</div>
@@ -81,6 +231,9 @@
       <div class="red-square" id="RB" onclick="uploadImage('RB')">Bench</div>
       <div class="red-square" id="RP" onclick="uploadImage('RP')">Bullpen</div>
     </div>
+
+    <button id="newGameButton">🎮 Start New Game</button>
+
 
   </div>
 
