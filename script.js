@@ -47,8 +47,8 @@ document.getElementById('newGameButton').addEventListener('click', () => {
       alert('Game URL copied to clipboard!');
     });
 
-    // Redirect to the new game URL (optional)
-    window.location.href = newGameUrl;  // If you want to redirect after showing the URL
+    // Optionally redirect to the new game URL after showing the URL
+    window.location.href = newGameUrl;
   });
 });
 
