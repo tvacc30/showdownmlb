@@ -736,108 +736,185 @@ function setupListeners() {
   });
 }
 
+// Keep your existing deleteImage function:
+/*
+function deleteImage(spotId) {
+    if (!gameRef) {
+        console.warn("Cannot delete image: No game loaded.");
+        return;
+    }
+    const spot = document.getElementById(spotId);
+    if (!spot) {
+        console.error(`Spot with ID '${spotId}' not found.`);
+        return;
+    }
+    spot.innerHTML = ''; // Clear the spot's content in the DOM
+    gameRef.child(`boardState/${spotId}`).remove() // Remove from Firebase
+        .then(() => console.log(`Image deleted from spot '${spotId}' in Firebase.`))
+        .catch(error => console.error("Error deleting image from Firebase:", error));
+}
+*/
+
+
 function makeDraggable(element) {
-  // Get a reference to the field area ONCE for efficiency
-  const fieldArea = document.querySelector('.field-area');
+    // Get references once outside the mousedown handler
+    const fieldArea = document.querySelector('.field-area');
+    const trashcanArea = document.getElementById('trashcan-area'); // --- NEW: Get trashcan reference ---
 
-  // Check if fieldArea exists to prevent errors
-  if (!fieldArea) {
-      console.error("Error: '.field-area' element not found. Draggable function aborted.");
-      return; // Exit if the field area isn't found
-  }
+    // Check if necessary elements exist
+    if (!fieldArea) {
+        console.error("Error: '.field-area' element not found. Draggable function aborted.");
+        return;
+    }
+    // Log a warning if trashcan is missing, but don't abort draggable
+    if (!trashcanArea) {
+         console.warn("Trashcan element with id 'trashcan-area' not found. Delete by dragging will not work.");
+    }
 
-  element.onmousedown = function(event) {
-      event.preventDefault();
 
-      let shiftX = event.clientX - element.getBoundingClientRect().left;
-      let shiftY = event.clientY - element.getBoundingClientRect().top;
+    element.onmousedown = function(event) {
+        event.preventDefault();
 
-      element.classList.add('dragging');
-      element.style.position = 'absolute';
-      element.style.zIndex = 1000; // High z-index during drag
+        // --- NEW: Capture the original spot's ID ---
+        // Check if the element is inside a spot div
+        const originalSpot = element.parentElement;
+        const originalSpotId = (originalSpot && originalSpot.classList.contains('spot')) ? originalSpot.id : null;
 
-       if (element.parentElement !== document.body) {
-             // Temporarily append to body during drag to avoid clipping issues
-             // Note: This might need adjustment if your layout relies on the element staying within a positioned container
-             document.body.appendChild(element);
-      }
+        if (!originalSpotId) {
+             console.warn("Dragged element is not directly inside a .spot div. Drag-to-delete might not work as expected.");
+             // You might choose to prevent dragging non-spot images here if needed
+        }
 
-      function moveAt(pageX, pageY) {
-          element.style.left = pageX - shiftX + 'px';
-          element.style.top = pageY - shiftY + 'px';
-      }
+        let shiftX = event.clientX - element.getBoundingClientRect().left;
+        let shiftY = event.clientY - element.getBoundingClientRect().top;
 
-      // Move the element immediately to the initial mouse position
-      moveAt(event.pageX, event.pageY);
+        element.classList.add('dragging');
+        element.style.position = 'absolute';
+        element.style.zIndex = 1000; // High z-index during drag
 
-      // --- Function to handle mouse movement ---
-      function onMouseMove(event) {
-          moveAt(event.pageX, event.pageY);
-      }
+         if (element.parentElement !== document.body) {
+               document.body.appendChild(element);
+        }
 
-      // --- Function to handle mouse button release (drop) ---
-      // Define this function so it can be removed later
-      function onMouseUp(event) {
-          // Stop listening to mouse movement AND mouseup
-          document.removeEventListener('mousemove', onMouseMove);
-          document.removeEventListener('mouseup', onMouseUp); // --- FIX: Remove listener from document ---
+        function moveAt(pageX, pageY) {
+            element.style.left = pageX - shiftX + 'px';
+            element.style.top = pageY - shiftY + 'px';
+        }
 
-          // --- Remove dragging class ---
-          element.classList.remove('dragging');
+        moveAt(event.pageX, event.pageY);
 
-          // --- Check the final drop location ---
-          let elementRect = element.getBoundingClientRect();
-          let fieldRect = fieldArea.getBoundingClientRect();
+        function onMouseMove(event) {
+            moveAt(event.pageX, event.pageY);
 
-          let elementCenterX = elementRect.left + elementRect.width / 2;
-          let elementCenterY = elementRect.top + elementRect.height / 2;
+            // Optional: Add visual feedback when dragging over trashcan
+            // Requires checking overlap on mousemove (more performance intensive)
+            /*
+            if (trashcanArea) {
+                const elementRect = element.getBoundingClientRect();
+                const trashcanRect = trashcanArea.getBoundingClientRect();
+                const isOverTrashcan = !(elementRect.right < trashcanRect.left ||
+                                          elementRect.left > trashcanRect.right ||
+                                          elementRect.bottom < trashcanRect.top ||
+                                          elementRect.top > trashcanRect.bottom);
 
-          let droppedOnField = (
-              elementCenterX > fieldRect.left &&
-              elementCenterX < fieldRect.right &&
-              elementCenterY > fieldRect.top &&
-              elementCenterY < fieldRect.bottom
-          );
+                if (isOverTrashcan) {
+                    trashcanArea.classList.add('drag-over');
+                    element.style.opacity = 0.5; // Example visual cue
+                } else {
+                    trashcanArea.classList.remove('drag-over');
+                    element.style.opacity = 1; // Reset visual cue
+                }
+            }
+            */
+        }
 
-          // --- Apply CSS class based on drop location ---
-          if (droppedOnField) {
-              console.log("Dropped ON field");
-              element.classList.add('on-field');
-              element.style.zIndex = 8;
+        // --- Function to handle mouse button release (drop) ---
+        function onMouseUp(event) {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
 
-              // Optional: If you want to re-parent the element to the fieldArea
-              // Requires .field-area to have position: relative;
-              // fieldArea.appendChild(element);
-              // // Adjust position relative to the field area's top-left corner
-              // element.style.left = (elementRect.left - fieldRect.left) + 'px';
-              // element.style.top = (elementRect.top - fieldRect.top) + 'px';
+            // Optional: Remove visual feedback class from trashcan
+            // if (trashcanArea) {
+            //     trashcanArea.classList.remove('drag-over');
+            //     element.style.opacity = 1; // Reset element opacity
+            // }
 
-          } else {
-              console.log("Dropped OFF field");
-              element.classList.remove('on-field');
-              element.style.zIndex = 'auto'; // Reset z-index
-              // Optional: Logic to handle dropping off the field (e.g., return to origin)
-          }
+            element.classList.remove('dragging');
 
-          // No need to set element.onmouseup = null here,
-          // because we are removing the listener from the document.
-      }
+            let elementRect = element.getBoundingClientRect();
 
-      // Attach the mousemove listener to the document to track movement anywhere
-      document.addEventListener('mousemove', onMouseMove);
-      // --- FIX: Attach the mouseup listener to the document ---
-      document.addEventListener('mouseup', onMouseUp);
+            // --- NEW: Check if dropped on trashcan ---
+            let droppedOnTrashcan = false;
+            if (trashcanArea && originalSpotId) { // Only check if trashcan exists and element came from a spot
+                 const trashcanRect = trashcanArea.getBoundingClientRect();
 
-      // Clean up the element's mousedown handler when the mouse is released
-      // (This is not strictly necessary as the drag ends, but can be good practice if needed)
-      // element.onmouseup = null; // This line from your original code is no longer needed or should be removed
-  }; // end of onmousedown
+                 // Check for overlap using bounding rectangles
+                 droppedOnTrashcan = !(elementRect.right < trashcanRect.left ||
+                                        elementRect.left > trashcanRect.right ||
+                                        elementRect.bottom < trashcanRect.top ||
+                                        elementRect.top > trashcanRect.bottom);
+                                        // Using center point check might be stricter:
+                                        // let elementCenterX = elementRect.left + elementRect.width / 2;
+                                        // let elementCenterY = elementRect.top + elementRect.height / 2;
+                                        // droppedOnTrashcan = (elementCenterX > trashcanRect.left && elementCenterX < trashcanRect.right &&
+                                        //                      elementCenterY > trashcanRect.top && elementCenterY < trashcanRect.bottom);
+            }
 
-  // Prevent the browser's default drag-and-drop behavior which can interfere
-  element.ondragstart = () => false;
+
+            if (droppedOnTrashcan && originalSpotId) { // Confirm came from a spot
+                console.log(`Dropped on trashcan. Deleting image from spot ${originalSpotId}`);
+                deleteImage(originalSpotId); // Call delete function
+                // Remove the element from the DOM immediately after deletion
+                 if (element.parentNode) {
+                     element.parentNode.removeChild(element);
+                 }
+                return; // Stop processing further (don't do field/off-field logic)
+            }
+
+
+            // --- If NOT dropped on trashcan, proceed with field/off-field check (existing logic) ---
+            const fieldRect = fieldArea.getBoundingClientRect();
+
+            let elementCenterX = elementRect.left + elementRect.width / 2; // Recalculate if needed
+            let elementCenterY = elementRect.top + elementRect.height / 2; // Recalculate if needed
+
+            let droppedOnField = (
+                elementCenterX > fieldRect.left &&
+                elementCenterX < fieldRect.right &&
+                elementCenterY > fieldRect.top &&
+                elementCenterY < fieldRect.bottom
+            );
+
+            if (droppedOnField) {
+                console.log("Dropped ON field");
+                element.classList.add('on-field');
+                element.style.zIndex = 8;
+                // TODO: If re-parenting to fieldArea, do it here and update Firebase with position
+            } else {
+                console.log("Dropped OFF field (not on trashcan)");
+                element.classList.remove('on-field');
+                element.style.zIndex = 'auto';
+                 // TODO: If the image should snap back to its original spot
+                 // when dropped off-field/off-trashcan, implement that here.
+                 // You would need to store the original position before appending to body.
+                 // For now, it stays wherever it was dropped in the body.
+            }
+
+            // No need to set element.onmouseup = null
+        }
+
+        // Attach listeners to the document
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+
+    }; // end of onmousedown
+
+    // Prevent the browser's default drag-and-drop behavior
+    element.ondragstart = () => false;
 }
 
-
+// The makeDraggable function is called when images are loaded or uploaded.
+// It will automatically apply this new drag-to-delete behavior
 // --- NEW: Add Event Listeners for Scoreboard Control Buttons ---
 // Use event delegation on a parent container or add listeners to each button.
 // Adding to each button is simpler for a fixed set.

@@ -1,0 +1,17 @@
+[33m16278f8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Your commit message here
+[33ma4cb93b[m Update scoreboard layout and functionality
+[33m000bada[m Deploy updated baseball field layout
+[33mc57790a[m Updated Firebase config and added URL sharing feature
+[33m608078e[m Updated game creation logic
+[33m5dac80f[m Update game logic for new game creation and real-time sync
+[33m242bc1e[m Add new game functionality with gameId URLs
+[33mb93abd6[m Updated HTML and JS for Firebase integration
+[33m450cf3e[m Update HTML, CSS, and JS files
+[33mf4ab1d9[m Delete CNAME
+[33m2e0259e[m Create CNAME
+[33ma38673e[m Move index.html to root
+[33m7ab3daa[m Add placemat project files
+[33me1dbdd3[m Delete CNAME
+[33m3aee437[m Create CNAME
+[33m873067d[m Initial baseball field placemat upload
+[33mc265a68[m Create README.md

@@ -76,7 +76,7 @@ body {
   /* Realistic grass gradient */
   background: radial-gradient(ellipse at 50% 100%, #4caf50 30%, #2e7d32 70%, #1b5e20 95%);
   /* Fan-shaped outfield grass area */
-   clip-path: polygon(
+    clip-path: polygon(
     0% 0%, 100% 0%, /* Top edge */
     100% 40%, /* Right edge start curve */
     55% 90%, /* Bottom right point */
@@ -178,7 +178,7 @@ body {
 }
 
 #dice1-container {
-  left: 20px;
+  right: 220px;
 }
 
 #dice2-container {
@@ -296,11 +296,11 @@ body {
 
 /* Base style for all draggable images (Off-field size) */
 .draggable-image {
-  cursor: grab;         /* Indicate it's draggable */
-  max-width: 100px;     /* Default OFF-FIELD max width */
-  max-height: 100px;    /* Default OFF-FIELD max height */
-  width: auto;          /* Allow image to shrink if needed */
-  height: auto;         /* Maintain aspect ratio */
+  cursor: grab;        /* Indicate it's draggable */
+  max-width: 100px;    /* Default OFF-FIELD max width */
+  max-height: 100px;   /* Default OFF-FIELD max height */
+  width: auto;         /* Allow image to shrink if needed */
+  height: auto;        /* Maintain aspect ratio */
   transition: max-width 0.2s ease, max-height 0.2s ease; /* Smooth size change */
   /* Add other necessary styles like display, maybe position if needed */
   display: block; /* Or inline-block depending on layout */
@@ -308,8 +308,8 @@ body {
 
 /* Style for when the image IS on the field */
 .draggable-image.on-field {
-  max-width: 200px;     /* ON-FIELD max width */
-  max-height: 200px;    /* ON-FIELD max height */
+  max-width: 200px;    /* ON-FIELD max width */
+  max-height: 200px;   /* ON-FIELD max height */
   /* Position might be needed if you freely place items on the field */
   /* position: absolute; */
   /* z-index: 8; */ /* Ensure it's above field elements but below UI like dice */
@@ -346,8 +346,8 @@ body {
 }
 
 .draggable.dragging {
-   opacity: 0.6;
-   cursor: grabbing;
+    opacity: 0.6;
+    cursor: grabbing;
 }
 
 .start-new-game {
@@ -491,15 +491,50 @@ button[data-action="add-error"] {
   border-color: #c82333;
 }
 button[data-action="add-error"]:hover {
-   background-color: #c82333;
-   border-color: #bd2130;
+    background-color: #c82333;
+    border-color: #bd2130;
 }
 
 button[data-action="next-inning"] {
-   background-color: #28a745;
-   border-color: #218838;
+    background-color: #28a745;
+    border-color: #218838;
 }
 button[data-action="next-inning"]:hover {
-   background-color: #218838;
-   border-color: #1e7e34;
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+/* Trashcan Area Styling */
+#trashcan-area {
+    width: 150px; /* Example size */
+    height: 100px; /* Example size */
+    border: 2px dashed #dc3545; /* Red dashed border */
+    background-color: #f8d7da; /* Light red background */
+    color: #721c24; /* Dark red text */
+    text-align: center;
+    padding: 10px;
+    margin: 20px auto; /* Center if block element */
+    border-radius: 8px;
+    display: flex; /* Use flexbox to center content */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    box-sizing: border-box; /* Include padding and border in size */
+}
+
+/* Optional: Style for trashcan icon if used */
+/*
+#trashcan-area img {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 5px;
+}
+*/
+
+/* Optional: Visual feedback when dragging over the trashcan (more advanced, requires JS onmousemove) */
+/*
+#trashcan-area.drag-over {
+    background-color: #f1aeb5;
+    border-color: #dc3545;
+    border-style: solid;
 }
