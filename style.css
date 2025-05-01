@@ -2,31 +2,46 @@
 body {
   background-color: #1f512f; /* Dark green for surrounding area */
   display: flex;
-  justify-content: center;
-  align-items: center; /* Center vertically */
-  padding: 20px;
+  flex-direction: column; /* Stack main areas vertically */
+  align-items: center; /* Center items horizontally */
+  padding: 0; /* Adjust padding as full-width containers might add their own */
   margin: 0;
   min-height: 100vh; /* Ensure full viewport height */
   /* font-family: sans-serif; */ /* Optional: Add a default font */
 }
 
+/* New containers for full-width lineups */
+.top-lineup-area,
+.bottom-lineup-area {
+    width: 100%; /* Take full width */
+    max-width: 100%; /* Ensure no max-width constraint */
+    padding: 20px; /* Add some internal padding */
+    box-sizing: border-box; /* Include padding in the element's total width */
+    /* Add background or other styling if desired for these areas */
+}
+
+/* Keep placemat for the field area and anything else meant to be centered/width-constrained */
 .placemat {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
   width: 100%;
-  max-width: 1200px; /* Limit width for larger screens */
-  /* overflow-x: auto; */ /* Consider if needed, may clip fixed elements */
+  max-width: 1200px; /* Limit width for the central content */
+  /* Remove padding and margin if they were causing issues with full-width areas */
+  padding: 0;
+  margin: 20px auto; /* Center the placemat horizontally and add vertical space */
+  /* overflow-x: auto; */
 }
 
 /* --- Grids (Example) --- */
+/* These grids are inside the new full-width containers, their width: 100%
+   will make them span the container width. */
 .top-grid, .bottom-grid {
   display: grid;
-  /* Updated grid definition for flexibility */
   grid-template-columns: repeat(11, minmax(50px, 1fr));
   gap: 5px;
-  width: 100%; /* Take available width */
+  width: 100%; /* Take available width of their new parent container */
   padding: 10px;
   background-color: rgba(0,0,0,0.1); /* Example background */
   border-radius: 5px;
@@ -34,24 +49,27 @@ body {
 
 /* --- Baseball Field Area (Improved) --- */
 .field-area {
-  position: relative; /* Context for absolute positioning */
-  width: 600px;
-  height: 600px;
+  position: relative; /* Crucial for positioning children (scoreboard/controls) */
+  /* Keep your desired field size, e.g., 1200x1200 from previous step */
+  width: 1200px;
+  height: 1200px;
   background: #a0522d; /* Base color - can be dirt or warning track */
-  border: 4px solid #ffffff; /* White border for field edge */
-  border-radius: 15px; /* Slightly softer corners */
+  border: 8px solid #ffffff; /* White border for field edge */
+  border-radius: 30px; /* Slightly softer corners */
   overflow: hidden; /* Clip elements extending outside */
+  /* Adjusted margin now that placemat handles centering */
+  margin: 0; /* Remove margin from the field area itself */
 }
 
 /* Optional: Warning track using its own div */
 .warning-track {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; /* Keep 0, relative to parent */
+  left: 0; /* Keep 0, relative to parent */
+  width: 100%; /* Keep 100%, relative to parent */
+  height: 100%; /* Keep 100%, relative to parent */
   background: #6d4c41; /* Dirt warning track */
-  /* This shape creates a border inside the main field area */
+  /* Clip path uses percentages, scales proportionally */
   clip-path: polygon(
     0% 0%, 100% 0%, /* Top edge */
     100% 35%, /* Right edge start curve */
@@ -61,7 +79,6 @@ body {
     0% 35% /* Left edge start curve */
   );
   z-index: 1; /* Below grass */
-  /* Removed opacity: 0.8 from original, assuming solid color is desired */
 }
 
 
@@ -69,13 +86,13 @@ body {
 .field-area::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  /* Realistic grass gradient */
+  top: 0; /* Keep 0, relative to parent */
+  left: 0; /* Keep 0, relative to parent */
+  width: 100%; /* Keep 100%, relative to parent */
+  height: 100%; /* Keep 100%, relative to parent */
+  /* Realistic grass gradient - uses percentages, scales */
   background: radial-gradient(ellipse at 50% 100%, #4caf50 30%, #2e7d32 70%, #1b5e20 95%);
-  /* Fan-shaped outfield grass area */
+  /* Fan-shaped outfield grass area - uses percentages, scales */
     clip-path: polygon(
     0% 0%, 100% 0%, /* Top edge */
     100% 40%, /* Right edge start curve */
@@ -90,40 +107,49 @@ body {
 /* Infield diamond */
 .diamond {
   position: absolute;
-  width: 300px;
-  height: 300px;
+  /* Original: width: 300px; height: 300px; */
+  width: 600px; /* Increased by 100% (x2) */
+  height: 600px; /* Increased by 100% (x2) */
   background: linear-gradient(135deg, #b98a65, #a0522d); /* Lighter dirt infield */
-  transform: rotate(45deg);
-  /* Center the diamond (Field 600x600, Diamond 300x300) */
-  top: 150px;
-  left: 150px;
+  transform: rotate(45deg); /* Keep rotation */
+  /* Original: top: 150px; left: 150px; (Centered on 600x600) */
+  /* New center on 1200x1200: top 300, left 300 */
+  top: 300px; /* Increased by 100% (x2) */
+  left: 300px; /* Increased by 100% (x2) */
   z-index: 3; /* Above grass */
-  border: 1px solid #6d4c41; /* Subtle dirt edge */
+  /* Original: border: 1px solid #6d4c41; */
+  border: 2px solid #6d4c41; /* Increased border thickness */
 }
 
-/* Base paths */
+/* Base paths - Need to be added/positioned */
+/* This block is kept as a placeholder, specific positioning depends on how paths are implemented */
 .base-path {
     position: absolute;
     background-color: #8b5a2b; /* Darker dirt for paths */
     z-index: 4; /* Above diamond dirt, below bases */
+    /* Specific positioning (top, left, width, height) needed for each path segment, scaled by 2x */
 }
 
 /* Foul lines */
 .foul-line {
   position: absolute;
-  width: 3px; /* Line thickness */
-  height: 450px; /* Length - extend past infield */
+  /* Original width: 3px; */
+  width: 6px; /* Line thickness (Increased by 100% (x2)) */
+  /* Original height: 450px; */
+  height: 900px; /* Length - extend past infield (Increased by 100% (x2)) */
   background-color: #ffffff;
-  bottom: 100px; /* Start below home plate center */
-  left: 298.5px; /* Center horizontally */
-  transform-origin: bottom center; /* Rotate around home plate point */
+  /* Original bottom: 100px; */
+  bottom: 200px; /* Start below home plate center (Increased by 100% (x2)) */
+  /* Original left: 298.5px; */
+  left: 597px; /* Center horizontally (Increased by 100% (x2)) */
+  transform-origin: bottom center; /* Keep origin */
   z-index: 5; /* Above diamond/paths, below bases */
 }
 .foul-line.left {
-  transform: rotate(-45deg);
+  transform: rotate(-45deg); /* Keep rotation */
 }
 .foul-line.right {
-  transform: rotate(45deg);
+  transform: rotate(45deg); /* Keep rotation */
 }
 
 
@@ -132,53 +158,78 @@ body {
   position: absolute;
   background-color: #f5f5f5; /* Worn base color */
   z-index: 6; /* Above paths and lines */
-  border: 1px solid #d3d3d3;
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+  /* Original: border: 1px solid #d3d3d3; */
+  border: 2px solid #d3d3d3; /* Increased border thickness */
+  /* Original: box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); */
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2); /* Increased shadow values */
 }
 
 /* Home plate - Pentagon Shape */
 #home {
-  width: 25px; height: 25px;
-  bottom: 85px; /* Position adjusted for non-rotated shape */
-  left: 287.5px; /* Center horizontally (600/2 - 25/2) */
-  clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 50% 100%, 0% 50%);
+  /* Original: width: 25px; height: 25px; */
+  width: 50px; height: 50px; /* Increased by 100% (x2) */
+  /* Original bottom: 85px; */
+  bottom: 170px; /* Position adjusted (Increased by 100% (x2)) */
+  /* Original left: 287.5px; */
+  left: 575px; /* Center horizontally (Increased by 100% (x2)) */
+  clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 50% 100%, 0% 50%); /* Keep shape */
   background-color: #ffffff; /* Typically brighter white */
   /* Note: No transform: rotate(45deg) needed */
 }
 
 /* Other bases - Square rotated */
 #first, #second, #third {
-  width: 20px; height: 20px;
-  transform: rotate(45deg);
+  /* Original: width: 20px; height: 20px; */
+  width: 40px; height: 40px; /* Increased by 100% (x2) */
+  transform: rotate(45deg); /* Keep rotation */
 }
-#first { top: 290px; left: 480px; } /* Right corner */
-#second { top: 100px; left: 290px; } /* Top corner */
-#third { top: 290px; left: 100px; } /* Left corner */
+/* Original positions on 600x600 field: */
+/* #first: top: 290px; left: 480px; */
+/* #second: top: 100px; left: 290px; */
+/* #third: top: 290px; left: 100px; */
+
+#first {
+    top: 580px; /* Increased by 100% (x2) */
+    left: 960px; /* Increased by 100% (x2) */
+}
+#second {
+    top: 200px; /* Increased by 100% (x2) */
+    left: 580px; /* Increased by 100% (x2) */
+}
+#third {
+    top: 580px; /* Increased by 100% (x2) */
+    left: 200px; /* Increased by 100% (x2) */
+}
 
 
 /* Pitcher’s mound */
 .mound {
   position: absolute;
-  width: 50px; height: 50px;
+  /* Original: width: 50px; height: 50px; */
+  width: 100px; height: 100px; /* Increased by 100% (x2) */
   background: radial-gradient(circle, #a86a3d 20%, #8b5a2b 70%); /* Worn dirt center */
-  border-radius: 50%;
-  /* Center roughly between home and second */
-  top: 275px; left: 275px; /* Center position (300 - 50/2) */
+  border-radius: 50%; /* Keep round */
+  /* Original: top: 275px; left: 275px; */
+  /* Center roughly between home and second - will be scaled */
+  top: 550px; /* Increased by 100% (x2) */
+  left: 550px; /* Increased by 100% (x2) */
   z-index: 7; /* Highest element on field */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Raised effect */
+  /* Original: box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Increased shadow values */
 }
 
+/* --- Other UI Elements (Dice, Squares/Spots, Button) --- */
 
-/* --- Other UI Elements (Dice, Squares, Button - Unchanged) --- */
+/* Dice containers remain fixed to the viewport */
 .dice-container {
   position: fixed;
   top: 20px;
   text-align: center;
-  z-index: 10; /* Ensure dice are above field */
+  z-index: 10; /* Ensure dice are above everything else */
 }
 
 #dice1-container {
-  right: 220px;
+  left: 20px;
 }
 
 #dice2-container {
@@ -193,7 +244,7 @@ body {
 }
 
 #dice1, #dice2 {
-  width: 100px;
+  width: 100px; /* Keep fixed size */
   cursor: pointer;
   transition: transform 0.5s ease;
 }
@@ -214,232 +265,179 @@ body {
   color: white;
 }
 
-/* Common styles for all individual spots */
+/* Common styles for all individual spots remain the same */
 .spot {
-  width: 100px;
+  width: 100px; /* Keep this size, it's for the spots in the lineup/bench grids */
   height: 100px;
-  border: 2px solid; /* Border color will be set by blue-spot/red-spot */
+  border: 2px solid;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: white; /* Text color */
+  color: white;
   font-weight: bold;
   font-size: 24px;
   overflow: hidden;
-  /* Add position, top, left, z-index if needed for positioning on a field */
 }
 
-/* Specific styles for spots within the Blue Team set */
+/* Specific spot styles remain the same */
 .blue-set .spot {
-  background-color: #007bff; /* Example Blue Background */
-  border-color: #0056b3; /* Example Darker Blue Border */
+  background-color: #007bff;
+  border-color: #0056b3;
 }
 
-/* Specific styles for spots within the Red Team set */
 .red-set .spot {
-  background-color: #dc3545; /* Example Red Background */
-  border-color: #c82333; /* Example Darker Red Border */
+  background-color: #dc3545;
+  border-color: #c82333;
 }
 
-/* Style for images within any spot */
+/* Style for images within any spot remains the same */
 .spot img {
   max-width: 100%;
   max-height: 100%;
-  display: block; /* Prevents extra space below the image */
+  display: block;
 }
 
-/* Optional: Styles for the container grids (Flexbox or Grid) */
+/* Styles for the container grids within lineup areas remain the same */
 .lineup-grid, .bench-grid, .pitcher-grid {
-  display: flex; /* Example: Use Flexbox for arrangement */
-  gap: 10px; /* Space between spots */
-  margin-bottom: 20px; /* Space between different groups of spots */
-  flex-wrap: wrap; /* Allow spots to wrap to the next line */
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
-/* Optional: Styles for the main team set containers */
+/* Styles for the main team set containers remain the same */
 .team-set {
-    margin-bottom: 40px; /* Space between the blue and red sets */
+    margin-bottom: 40px;
 }
 
-/* Optional: Style for the headers */
+/* Styles for the headers remain the same */
 .team-set h3 {
-    color: #333; /* Example header color */
+    color: #333;
     margin-bottom: 15px;
     border-bottom: 2px solid #eee;
     padding-bottom: 5px;
 }
 
-/* Clean up the old rules */
-/* You can remove or comment out the following old rules as they are replaced by .spot, .blue-set .spot, and .red-set .spot */
-/*
-.blue-square, .red-square, .center-square {
-  width: 100px;
-  height: 100px;
-  background-color: #347c3c;
-  border: 2px solid #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-weight: bold;
-  font-size: 24px;
-  overflow: hidden;
-}
-
-.blue-square img, .red-square img, .center-square img {
-  max-width: 100%;
-  max-height: 100%;
-}
-*/
-
-/* --- Draggable Image Styles --- */
-
-/* Base style for all draggable images (Off-field size) */
+/* Draggable Images */
 .draggable-image {
-  cursor: grab;        /* Indicate it's draggable */
-  max-width: 100px;    /* Default OFF-FIELD max width */
-  max-height: 100px;   /* Default OFF-FIELD max height */
-  width: auto;         /* Allow image to shrink if needed */
-  height: auto;        /* Maintain aspect ratio */
-  transition: max-width 0.2s ease, max-height 0.2s ease; /* Smooth size change */
-  /* Add other necessary styles like display, maybe position if needed */
-  display: block; /* Or inline-block depending on layout */
-}
-
-/* Style for when the image IS on the field */
-.draggable-image.on-field {
-  max-width: 200px;    /* ON-FIELD max width */
-  max-height: 200px;   /* ON-FIELD max height */
-  /* Position might be needed if you freely place items on the field */
-  /* position: absolute; */
-  /* z-index: 8; */ /* Ensure it's above field elements but below UI like dice */
-}
-
-/* Optional: Style while the image is being actively dragged */
-.draggable-image.dragging {
-  opacity: 0.6;      /* Make it semi-transparent */
-  cursor: grabbing;  /* Change cursor during drag */
-}
-
-/* You might need to adjust the existing .draggable class if it conflicts */
-/* Or ensure your draggable images also have the .draggable-image class */
-
-/* Example: If your existing .draggable applies to the images */
-.draggable {
   cursor: grab;
-  transition: max-width 0.2s ease, max-height 0.2s ease;
-  display: block; /* Or inline-block */
-  width: auto;
-  height: auto;
-
-  /* Default (Off-field) size */
   max-width: 100px;
   max-height: 100px;
+  transition: max-width 0.2s ease, max-height 0.2s ease;
+  display: block;
 }
 
-.draggable.on-field {
-  /* On-field size */
-  max-width: 200px;
-  max-height: 200px;
-  /* position: absolute; */
-  /* z-index: 8; */
+.draggable-image.on-field {
+  max-width: 300px;
+  max-height: 300px;
 }
 
-.draggable.dragging {
-    opacity: 0.6;
-    cursor: grabbing;
+.draggable-image.dragging {
+  opacity: 0.6;
+  cursor: grabbing;
 }
 
 .start-new-game {
   background-color: purple;
   color: white;
-  padding: 10px 20px;
+  padding: 50px 60px;
   border: none;
   cursor: pointer;
-  position: fixed;
+  position: fixed; /* Keep fixed positioning */
   top: 20px;
-  /* Add left or right positioning */
-  /* Example: Center it horizontally */
   left: 50%;
   transform: translateX(-50%);
-  z-index: 10; /* Ensure button is above field */
+  z-index: 10; /* Ensure button is above everything */
 }
+
+/* --- Scoreboard and Controls (Moved Inside Field) --- */
+
 /* Scoreboard Container */
 .scoreboard-container {
-  margin: 20px auto; /* Center and add some margin */
-  max-width: fit-content; /* Don't let it stretch too wide */
+  /* Remove flow/margin positioning */
+  /* margin: 20px auto; */
+  position: absolute; /* Position relative to .field-area */
+  /* Example placement: Top Right corner inside the field */
+  top: 800px;
+  right: 20px;
+  z-index: 9; /* Above field elements (7, 8) but below fixed UI (10) */
+
+  /* Adjust size and internal padding to fit within the field */
+  width: 450px; /* Set a width to fit */
+  max-width: none; /* Override previous max-width */
   background-color: #f0f0f0; /* Light background */
   border: 1px solid #ccc;
   border-radius: 8px;
-  padding: 15px;
+  padding: 10px; /* Reduced padding */
   text-align: center;
 }
 
 .scoreboard-container h2 {
   color: #333;
   margin-top: 0;
-  margin-bottom: 15px;
+  margin-bottom: 10px; /* Reduced margin */
+  font-size: 18px; /* Reduced font size */
 }
 
 /* Scoreboard Table */
 .baseball-scoreboard {
-  border-collapse: collapse; /* Remove space between borders */
-  margin: 0 auto 15px auto; /* Center the table and add space below */
+  border-collapse: collapse;
+  margin: 0 auto 10px auto; /* Center table, reduced margin */
   font-family: Arial, sans-serif;
-  font-size: 14px;
-  width: 100%; /* Make table take up container width */
+  font-size: 12px; /* Reduced font size */
+  width: 100%; /* Take container width */
 }
 
 .baseball-scoreboard th,
 .baseball-scoreboard td {
-  border: 1px solid #aaa; /* Cell borders */
-  padding: 8px 5px; /* Padding inside cells */
-  text-align: center; /* Center text in cells */
-  min-width: 25px; /* Ensure inning cells have minimum width */
+  border: 1px solid #aaa;
+  padding: 4px 3px; /* Reduced padding */
+  text-align: center;
+  min-width: 18px; /* Reduced min width for inning cells */
 }
 
 .baseball-scoreboard thead th {
-  background-color: #333; /* Dark header background */
-  color: white; /* White text for headers */
+  background-color: #333;
+  color: white;
   font-weight: bold;
-  text-transform: uppercase; /* Uppercase R, H, E */
+  text-transform: uppercase;
 }
 
 .baseball-scoreboard tbody td {
-  background-color: #fff; /* White background for body cells */
+  background-color: #fff;
   color: #333;
 }
 
 /* Team Name Column */
 .baseball-scoreboard td.team-name {
-  text-align: left; /* Align team names to the left */
+  text-align: left;
   font-weight: bold;
-  background-color: #e9e9e9; /* Slightly different background */
-  min-width: 80px; /* Give team name more space */
+  background-color: #e9e9e9;
+  min-width: 60px; /* Reduced min width */
 }
 
 /* Total Columns (R, H, E) */
-.baseball-scoreboard th:nth-last-child(1), /* Target E header */
-.baseball-scoreboard td:nth-last-child(1), /* Target E data */
-.baseball-scoreboard th:nth-last-child(2), /* Target H header */
-.baseball-scoreboard td:nth-last-child(2), /* Target H data */
-.baseball-scoreboard th:nth-last-child(3), /* Target R header */
-.baseball-scoreboard td:nth-last-child(3) /* Target R data */
+.baseball-scoreboard th:nth-last-child(1),
+.baseball-scoreboard td:nth-last-child(1),
+.baseball-scoreboard th:nth-last-child(2),
+.baseball-scoreboard td:nth-last-child(2),
+.baseball-scoreboard th:nth-last-child(3),
+.baseball-scoreboard td:nth-last-child(3)
 {
-  font-weight: bold; /* Make total numbers bold */
-  background-color: #e0e0e0; /* Grey background for totals */
+  font-weight: bold;
+  background-color: #e0e0e0;
 }
 
 /* Highlight Current Inning (Added by JavaScript) */
 .baseball-scoreboard td.current-inning-cell {
-  background-color: #ffff99; /* Yellowish highlight */
+  background-color: #ffff99;
   font-weight: bold;
 }
 
 /* Game State Info (Inning, Outs) */
 .game-state {
-  margin-top: 15px;
-  font-size: 16px;
+  margin-top: 10px; /* Reduced margin */
+  font-size: 14px; /* Reduced font size */
   color: #555;
 }
 
@@ -447,11 +445,21 @@ body {
   font-weight: bold;
   color: #333;
 }
+
 /* Scoreboard Controls */
 .scoreboard-controls {
-  margin: 20px auto;
-  max-width: fit-content;
-  padding: 15px;
+  /* Remove flow/margin positioning */
+  /* margin: 20px auto; */
+  position: absolute; /* Position relative to .field-area */
+  /* Example placement: Bottom Right corner inside the field */
+  bottom: 20px;
+  right: 20px;
+  z-index: 9; /* Above field elements (7, 8) but below fixed UI (10) */
+
+  /* Adjust size and internal padding to fit within the field */
+  width: 450px; /* Match scoreboard width */
+  max-width: none; /* Override previous max-width */
+  padding: 10px; /* Reduced padding */
   border: 1px solid #ccc;
   border-radius: 8px;
   background-color: #f9f9f9;
@@ -460,23 +468,24 @@ body {
 
 .scoreboard-controls h4 {
   margin-top: 0;
-  margin-bottom: 15px;
+  margin-bottom: 10px; /* Reduced margin */
+  font-size: 16px; /* Reduced font size */
   color: #333;
 }
 
 .scoreboard-controls .control-row {
-  margin-bottom: 10px; /* Space between rows of buttons */
+  margin-bottom: 8px; /* Reduced space between rows */
 }
 
 .scoreboard-controls button {
-  padding: 8px 15px;
-  margin: 0 5px; /* Space between buttons */
+  padding: 5px 12px; /* Reduced padding */
+  margin: 0 4px; /* Reduced space between buttons */
   cursor: pointer;
   border: 1px solid #007bff;
   border-radius: 5px;
   background-color: #007bff;
   color: white;
-  font-size: 14px;
+  font-size: 12px; /* Reduced font size */
   transition: background-color 0.2s ease;
 }
 
@@ -485,7 +494,6 @@ body {
   border-color: #004085;
 }
 
-/* Specific button styles if needed */
 button[data-action="add-error"] {
   background-color: #dc3545;
   border-color: #c82333;
@@ -502,39 +510,4 @@ button[data-action="next-inning"] {
 button[data-action="next-inning"]:hover {
     background-color: #218838;
     border-color: #1e7e34;
-}
-/* Trashcan Area Styling */
-#trashcan-area {
-    width: 150px; /* Example size */
-    height: 100px; /* Example size */
-    border: 2px dashed #dc3545; /* Red dashed border */
-    background-color: #f8d7da; /* Light red background */
-    color: #721c24; /* Dark red text */
-    text-align: center;
-    padding: 10px;
-    margin: 20px auto; /* Center if block element */
-    border-radius: 8px;
-    display: flex; /* Use flexbox to center content */
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-size: 14px;
-    box-sizing: border-box; /* Include padding and border in size */
-}
-
-/* Optional: Style for trashcan icon if used */
-/*
-#trashcan-area img {
-    width: 30px;
-    height: 30px;
-    margin-bottom: 5px;
-}
-*/
-
-/* Optional: Visual feedback when dragging over the trashcan (more advanced, requires JS onmousemove) */
-/*
-#trashcan-area.drag-over {
-    background-color: #f1aeb5;
-    border-color: #dc3545;
-    border-style: solid;
 }
