@@ -20,22 +20,35 @@ if (!gameId) {
   alert("No game loaded. Click 'Start New Game' to begin.");
 }
 
-// Reference to this game's data
 let gameRef = null;
 if (gameId) {
   gameRef = db.ref(`games/${gameId}`);
   setupListeners();
 }
 
-// Start new game
 document.getElementById('newGameButton').addEventListener('click', () => {
-  const newGameRef = db.ref('games').push();
+  const newGameRef = db.ref('games').push();  // Create new game
   newGameRef.set({
     boardState: {},
     diceResults: { dice1: null, dice2: null }
   }).then(() => {
-    const newGameId = newGameRef.key;
-    window.location.href = `${window.location.pathname}?gameId=${newGameId}`;
+    const newGameId = newGameRef.key;  // Get the new game ID
+    const newGameUrl = `${window.location.origin}${window.location.pathname}?gameId=${newGameId}`;
+    
+    // Show the URL section
+    document.getElementById('gameUrlSection').style.display = 'block';
+    document.getElementById('gameUrlInput').value = newGameUrl;  // Set the new game URL in the input
+
+    // Copy the URL to the clipboard
+    document.getElementById('copyUrlButton').addEventListener('click', () => {
+      const input = document.getElementById('gameUrlInput');
+      input.select();
+      document.execCommand('copy');
+      alert('Game URL copied to clipboard!');
+    });
+
+    // Redirect to the new game URL (optional)
+    window.location.href = newGameUrl;  // If you want to redirect after showing the URL
   });
 });
 
