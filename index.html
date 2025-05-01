@@ -4,197 +4,26 @@
   <meta charset="UTF-8">
   <title>MLB Showdown Placemat</title>
   <link rel="stylesheet" href="style.css">
-  
-  <script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyD7EhkUYesUQySkFF51fga5SuGsAuN2d3A",
-      authDomain: "showdown-7bc8f.firebaseapp.com",
-      projectId: "showdown-7bc8f",
-      storageBucket: "showdown-7bc8f.firebasestorage.app",
-      messagingSenderId: "1098398901533",
-      appId: "1:1098398901533:web:c4d33b0481c31330082df4",
-      measurementId: "G-JF81S3F5WY"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const db = getDatabase(app);
-
-    let currentSquare = null;
-    let gameId = new URLSearchParams(window.location.search).get('gameId');
-    
-    // If no gameId in the URL, create a new game
-    if (!gameId) {
-      createNewGame();
-    } else {
-      joinGame(gameId);
-    }
-
-    // Create a new game
-    function createNewGame() {
-      const newGameRef = ref(db, 'games').push(); // generates a new unique game ID
-      gameId = newGameRef.key;
-
-      // Initialize game data
-      set(newGameRef, {
-        boardState: Array(24).fill(null),
-        diceResults: { dice1: null, dice2: null }
-      });
-
-      // Redirect to the new game URL
-      window.location.href = `https://tvacc30.github.io/showdownmlb/?gameId=${gameId}`;
-    }
-
-    // Join an existing game
-    function joinGame(gameId) {
-      // Listen for changes to the game state (boardState and diceResults)
-      const gameRef = ref(db, `games/${gameId}`);
-
-      // Update the board state in real-time
-      onValue(ref(gameRef, 'boardState'), (snapshot) => {
-        const boardState = snapshot.val();
-        if (boardState) {
-          boardState.forEach((imgData, index) => {
-            const square = document.getElementById(`B${index + 1}`);
-            if (imgData) {
-              const img = document.createElement("img");
-              img.src = imgData;
-              img.classList.add("draggable");
-              makeDraggable(img);
-              square.innerHTML = '';
-              square.appendChild(img);
-            }
-          });
-        }
-      });
-
-      // Update dice results in real-time
-      onValue(ref(gameRef, 'diceResults'), (snapshot) => {
-        const diceResults = snapshot.val();
-        if (diceResults) {
-          if (diceResults.dice1 !== null) {
-            document.getElementById('diceResult1').textContent = `Roll result: ${diceResults.dice1}`;
-          }
-          if (diceResults.dice2 !== null) {
-            document.getElementById('diceResult2').textContent = `Roll result: ${diceResults.dice2}`;
-          }
-        }
-      });
-    }
-
-    // Upload image to a square and sync to Firebase
-    function uploadImage(squareId) {
-      currentSquare = document.getElementById(squareId);
-      document.getElementById('fileInput').dataset.squareId = squareId; // store square id on file input
-      document.getElementById('fileInput').click();
-    }
-
-    // Handle image upload
-    function handleImage(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const imgData = e.target.result;
-        const squareId = event.target.dataset.squareId;
-
-        // Create image element
-        const img = document.createElement("img");
-        img.src = imgData;
-        img.classList.add("draggable");
-        makeDraggable(img);
-
-        // Clear existing content and add image locally
-        const square = document.getElementById(squareId);
-        square.innerHTML = '';
-        square.appendChild(img);
-
-        // Save image data to Firebase
-        set(ref(db, `games/${gameId}/boardState/${squareId}`), imgData);
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // Make image draggable
-    function makeDraggable(element) {
-      element.onmousedown = function (event) {
-        event.preventDefault();
-        let shiftX = event.clientX - element.getBoundingClientRect().left;
-        let shiftY = event.clientY - element.getBoundingClientRect().top;
-
-        element.style.position = 'absolute';
-        element.style.zIndex = 1000;
-        document.body.appendChild(element);
-
-        moveAt(event.pageX, event.pageY);
-
-        function moveAt(pageX, pageY) {
-          element.style.left = pageX - shiftX + 'px';
-          element.style.top = pageY - shiftY + 'px';
-        }
-
-        function onMouseMove(event) {
-          moveAt(event.pageX, event.pageY);
-        }
-
-        document.addEventListener('mousemove', onMouseMove);
-
-        element.onmouseup = function () {
-          document.removeEventListener('mousemove', onMouseMove);
-          element.onmouseup = null;
-        };
-      };
-
-      element.ondragstart = function () {
-        return false;
-      };
-    }
-
-    // Roll dice and sync to Firebase
-    function rollDice(diceId) {
-      const result = Math.floor(Math.random() * 20) + 1;
-      set(ref(db, `games/${gameId}/diceResults/${diceId}`), result);
-    }
-
-    // New Game button functionality
-    function startNewGame() {
-      // Generate a new game ID and create the game data in Firebase
-      const newGameRef = ref(db, 'games').push(); // generates a new unique game ID
-      const newGameId = newGameRef.key;
-
-      // Initialize game data
-      set(newGameRef, {
-        boardState: Array(24).fill(null),
-        diceResults: { dice1: null, dice2: null }
-      });
-
-      // Redirect to the new game URL
-      window.location.href = `https://tvacc30.github.io/showdownmlb/?gameId=${newGameId}`;
-    }
-  </script>
-
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database-compat.js"></script>
 </head>
 <body>
   <div class="placemat">
-    <button id="newGameButton" onclick="startNewGame()">New Game</button>
+    <button id="newGameButton">🎮 Start New Game</button>
+
     <div class="top-grid">
-      <div class="blue-square" id="B1" onclick="uploadImage('B1')">1</div>
-      <div class="blue-square" id="B2" onclick="uploadImage('B2')">2</div>
-      <div class="blue-square" id="B3" onclick="uploadImage('B3')">3</div>
-      <div class="blue-square" id="B4" onclick="uploadImage('B4')">4</div>
-      <div class="blue-square" id="B5" onclick="uploadImage('B5')">5</div>
-      <div class="blue-square" id="B6" onclick="uploadImage('B6')">6</div>
-      <div class="blue-square" id="B7" onclick="uploadImage('B7')">7</div>
-      <div class="blue-square" id="B8" onclick="uploadImage('B8')">8</div>
-      <div class="blue-square" id="B9" onclick="uploadImage('B9')">9</div>
-      <div class="blue-square" id="BP" onclick="uploadImage('BP')">P</div>
-      <div class="blue-square" id="BB" onclick="uploadImage('BB')">B</div>
+      <div class="blue-square" id="B1">1</div>
+      <div class="blue-square" id="B2">2</div>
+      <div class="blue-square" id="B3">3</div>
+      <div class="blue-square" id="B4">4</div>
+      <div class="blue-square" id="B5">5</div>
+      <div class="blue-square" id="B6">6</div>
+      <div class="blue-square" id="B7">7</div>
+      <div class="blue-square" id="B8">8</div>
+      <div class="blue-square" id="B9">9</div>
+      <div class="blue-square" id="BP">P</div>
+      <div class="blue-square" id="BB">B</div>
     </div>
 
     <div class="field-area">
@@ -208,36 +37,33 @@
 
     <div class="dice-container" id="dice1-container">
       <div class="dice-label">Home</div>
-      <button onclick="rollDice('dice1')" id="dice1">🎲 Roll </button>
+      <button id="dice1">🎲 Roll</button>
       <div id="diceResult1">Roll result: --</div>
     </div>
 
     <div class="dice-container" id="dice2-container">
       <div class="dice-label">Away</div>
-      <button onclick="rollDice('dice2')" id="dice2">🎲 Roll </button>
+      <button id="dice2">🎲 Roll</button>
       <div id="diceResult2">Roll result: --</div>
     </div>
 
     <div class="bottom-grid">
-      <div class="red-square" id="R1" onclick="uploadImage('R1')">1</div>
-      <div class="red-square" id="R2" onclick="uploadImage('R2')">2</div>
-      <div class="red-square" id="R3" onclick="uploadImage('R3')">3</div>
-      <div class="red-square" id="R4" onclick="uploadImage('R4')">4</div>
-      <div class="red-square" id="R5" onclick="uploadImage('R5')">5</div>
-      <div class="red-square" id="R6" onclick="uploadImage('R6')">6</div>
-      <div class="red-square" id="R7" onclick="uploadImage('R7')">7</div>
-      <div class="red-square" id="R8" onclick="uploadImage('R8')">8</div>
-      <div class="red-square" id="R9" onclick="uploadImage('R9')">9</div>
-      <div class="red-square" id="RB" onclick="uploadImage('RB')">Bench</div>
-      <div class="red-square" id="RP" onclick="uploadImage('RP')">Bullpen</div>
+      <div class="red-square" id="R1">1</div>
+      <div class="red-square" id="R2">2</div>
+      <div class="red-square" id="R3">3</div>
+      <div class="red-square" id="R4">4</div>
+      <div class="red-square" id="R5">5</div>
+      <div class="red-square" id="R6">6</div>
+      <div class="red-square" id="R7">7</div>
+      <div class="red-square" id="R8">8</div>
+      <div class="red-square" id="R9">9</div>
+      <div class="red-square" id="RB">Bench</div>
+      <div class="red-square" id="RP">Bullpen</div>
     </div>
-
-    <button id="newGameButton">🎮 Start New Game</button>
-
-
   </div>
 
-  <input type="file" id="fileInput" style="display:none" accept="image/*" onchange="handleImage(event)">
+  <input type="file" id="fileInput" style="display:none" accept="image/*">
+
   <script src="script.js"></script>
 </body>
 </html>

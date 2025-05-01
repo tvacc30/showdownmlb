@@ -1,38 +1,60 @@
-let currentSquare = null;
-
-// Initialize Firebase Database
+// Firebase config and init
+const firebaseConfig = {
+  apiKey: "AIzaSyD7EhkUYesUQySkFF51fga5SuGsAuN2d3A",
+  authDomain: "showdown-7bc8f.firebaseapp.com",
+  databaseURL: "https://showdown-7bc8f-default-rtdb.firebaseio.com",
+  projectId: "showdown-7bc8f",
+  storageBucket: "showdown-7bc8f.appspot.com",
+  messagingSenderId: "1098398901533",
+  appId: "1:1098398901533:web:c4d33b0481c31330082df4"
+};
+firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// Get gameId from URL
+let currentSquare = null;
 const urlParams = new URLSearchParams(window.location.search);
-const gameId = urlParams.get('gameId');
+let gameId = urlParams.get('gameId');
 
-// Check for gameId
+// If no game loaded — alert user
 if (!gameId) {
-  alert("No game loaded — click 'Start New Game' to begin.");
+  alert("No game loaded. Click 'Start New Game' to begin.");
 }
 
-// Reference for this game's data
-const gameRef = db.ref(`games/${gameId}`);
+// Reference to this game's data
+let gameRef = null;
+if (gameId) {
+  gameRef = db.ref(`games/${gameId}`);
+  setupListeners();
+}
 
-// New Game Button functionality
+// Start new game
 document.getElementById('newGameButton').addEventListener('click', () => {
   const newGameRef = db.ref('games').push();
   newGameRef.set({
-    home: 0,
-    away: 0,
-    boardState: Array(24).fill(null),
-    diceResults: {
-      dice1: null,
-      dice2: null
-    }
+    boardState: {},
+    diceResults: { dice1: null, dice2: null }
   }).then(() => {
     const newGameId = newGameRef.key;
     window.location.href = `${window.location.pathname}?gameId=${newGameId}`;
   });
 });
 
-// Upload image to a square and sync to Firebase
+// Dice buttons
+document.getElementById('dice1').addEventListener('click', () => rollDice('dice1'));
+document.getElementById('dice2').addEventListener('click', () => rollDice('dice2'));
+
+function rollDice(diceId) {
+  const result = Math.floor(Math.random() * 20) + 1;
+  gameRef.child(`diceResults/${diceId}`).set(result);
+}
+
+// Image uploads
+document.querySelectorAll('.blue-square, .red-square').forEach(square => {
+  square.addEventListener('click', () => uploadImage(square.id));
+});
+
+document.getElementById('fileInput').addEventListener('change', handleImage);
+
 function uploadImage(squareId) {
   currentSquare = document.getElementById(squareId);
   document.getElementById('fileInput').dataset.squareId = squareId;
@@ -44,7 +66,7 @@ function handleImage(event) {
   if (!file) return;
 
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = e => {
     const imgData = e.target.result;
     const squareId = event.target.dataset.squareId;
 
@@ -57,12 +79,40 @@ function handleImage(event) {
     square.innerHTML = '';
     square.appendChild(img);
 
-    // Save image to Firebase in this game
-    gameRef.child(`squares/${squareId}`).set(imgData);
+    gameRef.child(`boardState/${squareId}`).set(imgData);
   };
   reader.readAsDataURL(file);
 }
 
+// Real-time listeners
+function setupListeners() {
+  gameRef.child('diceResults').on('value', snapshot => {
+    const results = snapshot.val();
+    if (results) {
+      document.getElementById('diceResult1').textContent = `Roll result: ${results.dice1 || '--'}`;
+      document.getElementById('diceResult2').textContent = `Roll result: ${results.dice2 || '--'}`;
+    }
+  });
+
+  gameRef.child('boardState').on('value', snapshot => {
+    const squares = snapshot.val();
+    if (squares) {
+      Object.keys(squares).forEach(squareId => {
+        const square = document.getElementById(squareId);
+        if (square) {
+          square.innerHTML = '';
+          const img = document.createElement("img");
+          img.src = squares[squareId];
+          img.classList.add("draggable");
+          makeDraggable(img);
+          square.appendChild(img);
+        }
+      });
+    }
+  });
+}
+
+// Drag logic
 function makeDraggable(element) {
   element.onmousedown = function(event) {
     event.preventDefault();
@@ -91,41 +141,5 @@ function makeDraggable(element) {
       element.onmouseup = null;
     };
   };
-
   element.ondragstart = () => false;
 }
-
-// Roll dice and sync to Firebase
-function rollDice(diceId) {
-  const result = Math.floor(Math.random() * 20) + 1;
-  gameRef.child(`diceResults/${diceId}`).set(result);
-}
-
-// Listen for live dice updates
-gameRef.child('diceResults').on('value', (snapshot) => {
-  const results = snapshot.val();
-  if (results) {
-    if (results.dice1 !== undefined)
-      document.getElementById('diceResult1').textContent = `Roll result: ${results.dice1}`;
-    if (results.dice2 !== undefined)
-      document.getElementById('diceResult2').textContent = `Roll result: ${results.dice2}`;
-  }
-});
-
-// Listen for image updates
-gameRef.child('squares').on('value', (snapshot) => {
-  const squares = snapshot.val();
-  if (squares) {
-    Object.keys(squares).forEach(squareId => {
-      const square = document.getElementById(squareId);
-      if (square) {
-        square.innerHTML = '';
-        const img = document.createElement("img");
-        img.src = squares[squareId];
-        img.classList.add("draggable");
-        makeDraggable(img);
-        square.appendChild(img);
-      }
-    });
-  }
-});
