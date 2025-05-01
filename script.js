@@ -736,13 +736,14 @@ function setupListeners() {
   });
 }
 
-// Make Draggable Function (Keep this as is)
 function makeDraggable(element) {
+  // Get a reference to the field area ONCE for efficiency
   const fieldArea = document.querySelector('.field-area');
 
+  // Check if fieldArea exists to prevent errors
   if (!fieldArea) {
       console.error("Error: '.field-area' element not found. Draggable function aborted.");
-      return;
+      return; // Exit if the field area isn't found
   }
 
   element.onmousedown = function(event) {
@@ -753,9 +754,11 @@ function makeDraggable(element) {
 
       element.classList.add('dragging');
       element.style.position = 'absolute';
-      element.style.zIndex = 1000;
+      element.style.zIndex = 1000; // High z-index during drag
 
        if (element.parentElement !== document.body) {
+             // Temporarily append to body during drag to avoid clipping issues
+             // Note: This might need adjustment if your layout relies on the element staying within a positioned container
              document.body.appendChild(element);
       }
 
@@ -764,18 +767,25 @@ function makeDraggable(element) {
           element.style.top = pageY - shiftY + 'px';
       }
 
+      // Move the element immediately to the initial mouse position
       moveAt(event.pageX, event.pageY);
 
+      // --- Function to handle mouse movement ---
       function onMouseMove(event) {
           moveAt(event.pageX, event.pageY);
       }
 
-      document.addEventListener('mousemove', onMouseMove);
-
-      element.onmouseup = function() {
+      // --- Function to handle mouse button release (drop) ---
+      // Define this function so it can be removed later
+      function onMouseUp(event) {
+          // Stop listening to mouse movement AND mouseup
           document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp); // --- FIX: Remove listener from document ---
+
+          // --- Remove dragging class ---
           element.classList.remove('dragging');
 
+          // --- Check the final drop location ---
           let elementRect = element.getBoundingClientRect();
           let fieldRect = fieldArea.getBoundingClientRect();
 
@@ -789,20 +799,41 @@ function makeDraggable(element) {
               elementCenterY < fieldRect.bottom
           );
 
+          // --- Apply CSS class based on drop location ---
           if (droppedOnField) {
               console.log("Dropped ON field");
               element.classList.add('on-field');
               element.style.zIndex = 8;
+
+              // Optional: If you want to re-parent the element to the fieldArea
+              // Requires .field-area to have position: relative;
+              // fieldArea.appendChild(element);
+              // // Adjust position relative to the field area's top-left corner
+              // element.style.left = (elementRect.left - fieldRect.left) + 'px';
+              // element.style.top = (elementRect.top - fieldRect.top) + 'px';
+
           } else {
               console.log("Dropped OFF field");
               element.classList.remove('on-field');
-              element.style.zIndex = 'auto';
+              element.style.zIndex = 'auto'; // Reset z-index
+              // Optional: Logic to handle dropping off the field (e.g., return to origin)
           }
 
-          element.onmouseup = null;
-      };
-  };
+          // No need to set element.onmouseup = null here,
+          // because we are removing the listener from the document.
+      }
 
+      // Attach the mousemove listener to the document to track movement anywhere
+      document.addEventListener('mousemove', onMouseMove);
+      // --- FIX: Attach the mouseup listener to the document ---
+      document.addEventListener('mouseup', onMouseUp);
+
+      // Clean up the element's mousedown handler when the mouse is released
+      // (This is not strictly necessary as the drag ends, but can be good practice if needed)
+      // element.onmouseup = null; // This line from your original code is no longer needed or should be removed
+  }; // end of onmousedown
+
+  // Prevent the browser's default drag-and-drop behavior which can interfere
   element.ondragstart = () => false;
 }
 
