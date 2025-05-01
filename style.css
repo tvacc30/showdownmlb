@@ -214,11 +214,68 @@ body {
   color: white;
 }
 
+/* Common styles for all individual spots */
+.spot {
+  width: 100px;
+  height: 100px;
+  border: 2px solid; /* Border color will be set by blue-spot/red-spot */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white; /* Text color */
+  font-weight: bold;
+  font-size: 24px;
+  overflow: hidden;
+  /* Add position, top, left, z-index if needed for positioning on a field */
+}
+
+/* Specific styles for spots within the Blue Team set */
+.blue-set .spot {
+  background-color: #007bff; /* Example Blue Background */
+  border-color: #0056b3; /* Example Darker Blue Border */
+}
+
+/* Specific styles for spots within the Red Team set */
+.red-set .spot {
+  background-color: #dc3545; /* Example Red Background */
+  border-color: #c82333; /* Example Darker Red Border */
+}
+
+/* Style for images within any spot */
+.spot img {
+  max-width: 100%;
+  max-height: 100%;
+  display: block; /* Prevents extra space below the image */
+}
+
+/* Optional: Styles for the container grids (Flexbox or Grid) */
+.lineup-grid, .bench-grid, .pitcher-grid {
+  display: flex; /* Example: Use Flexbox for arrangement */
+  gap: 10px; /* Space between spots */
+  margin-bottom: 20px; /* Space between different groups of spots */
+  flex-wrap: wrap; /* Allow spots to wrap to the next line */
+}
+
+/* Optional: Styles for the main team set containers */
+.team-set {
+    margin-bottom: 40px; /* Space between the blue and red sets */
+}
+
+/* Optional: Style for the headers */
+.team-set h3 {
+    color: #333; /* Example header color */
+    margin-bottom: 15px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 5px;
+}
+
+/* Clean up the old rules */
+/* You can remove or comment out the following old rules as they are replaced by .spot, .blue-set .spot, and .red-set .spot */
+/*
 .blue-square, .red-square, .center-square {
   width: 100px;
   height: 100px;
-  /* Original background: #347c3c - Consider if this should change if they overlay field */
-  background-color: #347c3c; /* Keeping original color */
+  background-color: #347c3c;
   border: 2px solid #fff;
   display: flex;
   justify-content: center;
@@ -227,14 +284,13 @@ body {
   font-weight: bold;
   font-size: 24px;
   overflow: hidden;
-  /* Add position: absolute; top: ...; left: ...; if these are meant to be placed on the placemat/field */
-  /* Add z-index if they need specific layering relative to field */
 }
 
 .blue-square img, .red-square img, .center-square img {
   max-width: 100%;
   max-height: 100%;
 }
+*/
 
 /* --- Draggable Image Styles --- */
 
@@ -307,4 +363,143 @@ body {
   left: 50%;
   transform: translateX(-50%);
   z-index: 10; /* Ensure button is above field */
+}
+/* Scoreboard Container */
+.scoreboard-container {
+  margin: 20px auto; /* Center and add some margin */
+  max-width: fit-content; /* Don't let it stretch too wide */
+  background-color: #f0f0f0; /* Light background */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+}
+
+.scoreboard-container h2 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+/* Scoreboard Table */
+.baseball-scoreboard {
+  border-collapse: collapse; /* Remove space between borders */
+  margin: 0 auto 15px auto; /* Center the table and add space below */
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  width: 100%; /* Make table take up container width */
+}
+
+.baseball-scoreboard th,
+.baseball-scoreboard td {
+  border: 1px solid #aaa; /* Cell borders */
+  padding: 8px 5px; /* Padding inside cells */
+  text-align: center; /* Center text in cells */
+  min-width: 25px; /* Ensure inning cells have minimum width */
+}
+
+.baseball-scoreboard thead th {
+  background-color: #333; /* Dark header background */
+  color: white; /* White text for headers */
+  font-weight: bold;
+  text-transform: uppercase; /* Uppercase R, H, E */
+}
+
+.baseball-scoreboard tbody td {
+  background-color: #fff; /* White background for body cells */
+  color: #333;
+}
+
+/* Team Name Column */
+.baseball-scoreboard td.team-name {
+  text-align: left; /* Align team names to the left */
+  font-weight: bold;
+  background-color: #e9e9e9; /* Slightly different background */
+  min-width: 80px; /* Give team name more space */
+}
+
+/* Total Columns (R, H, E) */
+.baseball-scoreboard th:nth-last-child(1), /* Target E header */
+.baseball-scoreboard td:nth-last-child(1), /* Target E data */
+.baseball-scoreboard th:nth-last-child(2), /* Target H header */
+.baseball-scoreboard td:nth-last-child(2), /* Target H data */
+.baseball-scoreboard th:nth-last-child(3), /* Target R header */
+.baseball-scoreboard td:nth-last-child(3) /* Target R data */
+{
+  font-weight: bold; /* Make total numbers bold */
+  background-color: #e0e0e0; /* Grey background for totals */
+}
+
+/* Highlight Current Inning (Added by JavaScript) */
+.baseball-scoreboard td.current-inning-cell {
+  background-color: #ffff99; /* Yellowish highlight */
+  font-weight: bold;
+}
+
+/* Game State Info (Inning, Outs) */
+.game-state {
+  margin-top: 15px;
+  font-size: 16px;
+  color: #555;
+}
+
+.game-state span {
+  font-weight: bold;
+  color: #333;
+}
+/* Scoreboard Controls */
+.scoreboard-controls {
+  margin: 20px auto;
+  max-width: fit-content;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  text-align: center;
+}
+
+.scoreboard-controls h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.scoreboard-controls .control-row {
+  margin-bottom: 10px; /* Space between rows of buttons */
+}
+
+.scoreboard-controls button {
+  padding: 8px 15px;
+  margin: 0 5px; /* Space between buttons */
+  cursor: pointer;
+  border: 1px solid #007bff;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.scoreboard-controls button:hover {
+  background-color: #0056b3;
+  border-color: #004085;
+}
+
+/* Specific button styles if needed */
+button[data-action="add-error"] {
+  background-color: #dc3545;
+  border-color: #c82333;
+}
+button[data-action="add-error"]:hover {
+   background-color: #c82333;
+   border-color: #bd2130;
+}
+
+button[data-action="next-inning"] {
+   background-color: #28a745;
+   border-color: #218838;
+}
+button[data-action="next-inning"]:hover {
+   background-color: #218838;
+   border-color: #1e7e34;
 }
