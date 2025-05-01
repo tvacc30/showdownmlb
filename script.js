@@ -125,34 +125,127 @@ function setupListeners() {
   });
 }
 
-// Drag logic
 function makeDraggable(element) {
+  // Get a reference to the field area ONCE for efficiency
+  const fieldArea = document.querySelector('.field-area');
+
+  // Check if fieldArea exists to prevent errors
+  if (!fieldArea) {
+      console.error("Error: '.field-area' element not found.");
+      return; // Exit if the field area isn't found
+  }
+
   element.onmousedown = function(event) {
-    event.preventDefault();
-    let shiftX = event.clientX - element.getBoundingClientRect().left;
-    let shiftY = event.clientY - element.getBoundingClientRect().top;
+      // Prevent default browser actions like text selection or native image drag
+      event.preventDefault();
 
-    element.style.position = 'absolute';
-    element.style.zIndex = 1000;
-    document.body.appendChild(element);
+      // Calculate the offset from the mouse pointer to the element's top-left corner
+      let shiftX = event.clientX - element.getBoundingClientRect().left;
+      let shiftY = event.clientY - element.getBoundingClientRect().top;
 
-    moveAt(event.pageX, event.pageY);
+      // --- Add dragging class for visual feedback (optional) ---
+      element.classList.add('dragging');
 
-    function moveAt(pageX, pageY) {
-      element.style.left = pageX - shiftX + 'px';
-      element.style.top = pageY - shiftY + 'px';
-    }
+      // Temporarily make the element absolute and lift it above others
+      element.style.position = 'absolute';
+      element.style.zIndex = 1000; // High z-index during drag
 
-    function onMouseMove(event) {
+      // Append to body to ensure it's not clipped by parent containers during drag
+      // Note: It will be potentially moved into fieldArea on mouseup if dropped there
+      if (element.parentElement !== document.body) {
+           document.body.appendChild(element);
+      }
+
+
+      // --- Function to position the element ---
+      function moveAt(pageX, pageY) {
+          element.style.left = pageX - shiftX + 'px';
+          element.style.top = pageY - shiftY + 'px';
+      }
+
+      // Move the element immediately to the initial mouse position
       moveAt(event.pageX, event.pageY);
-    }
 
-    document.addEventListener('mousemove', onMouseMove);
+      // --- Function to handle mouse movement ---
+      function onMouseMove(event) {
+          moveAt(event.pageX, event.pageY);
+          // Note: Checking overlap during mousemove is possible but more complex/costly.
+          // We will check only on mouseup for simplicity and performance.
+      }
 
-    element.onmouseup = function() {
-      document.removeEventListener('mousemove', onMouseMove);
-      element.onmouseup = null;
-    };
-  };
+      // Attach the mousemove listener to the document to track movement anywhere
+      document.addEventListener('mousemove', onMouseMove);
+
+      // --- Function to handle mouse button release (drop) ---
+      element.onmouseup = function() {
+          // Stop listening to mouse movement
+          document.removeEventListener('mousemove', onMouseMove);
+
+          // --- Remove dragging class ---
+          element.classList.remove('dragging');
+
+          // --- Check the final drop location ---
+          let elementRect = element.getBoundingClientRect();
+          let fieldRect = fieldArea.getBoundingClientRect();
+
+          // Calculate the center coordinates of the dragged element
+          let elementCenterX = elementRect.left + elementRect.width / 2;
+          let elementCenterY = elementRect.top + elementRect.height / 2;
+
+          // Determine if the element's center is inside the field area's bounds
+          let droppedOnField = (
+              elementCenterX > fieldRect.left &&
+              elementCenterX < fieldRect.right &&
+              elementCenterY > fieldRect.top &&
+              elementCenterY < fieldRect.bottom
+          );
+
+          // --- Apply CSS class based on drop location ---
+          if (droppedOnField) {
+              console.log("Dropped ON field");
+              element.classList.add('on-field'); // Add class for larger size
+              element.style.zIndex = 8; // Set z-index suitable for on-field items
+
+              // --- Optional: Append element to the field area ---
+              // This keeps the DOM organized. Requires .field-area to have position: relative;
+              // fieldArea.appendChild(element);
+              // // Adjust position relative to the field area's top-left corner
+              // element.style.left = (elementRect.left - fieldRect.left) + 'px';
+              // element.style.top = (elementRect.top - fieldRect.top) + 'px';
+
+          } else {
+              console.log("Dropped OFF field");
+              element.classList.remove('on-field'); // Remove class to revert to default size
+              element.style.zIndex = 'auto'; // Reset z-index
+
+              // --- Optional: Logic to return the element ---
+              // e.g., move it back to a specific starting container or position
+              // element.style.position = 'static'; // Or its original value
+              // document.getElementById('off-field-container').appendChild(element);
+          }
+
+          // Clean up the mouseup handler to prevent memory leaks
+          element.onmouseup = null;
+      }; // end of onmouseup
+
+  }; // end of onmousedown
+
+  // Prevent the browser's default drag-and-drop behavior which can interfere
   element.ondragstart = () => false;
 }
+
+// --- How to Use ---
+// Make sure you call this function for each draggable image after the DOM is loaded.
+// Example: If your draggable images have the class "draggable-image"
+// document.addEventListener('DOMContentLoaded', () => {
+//     document.querySelectorAll('.draggable-image').forEach(img => {
+//         makeDraggable(img);
+//     });
+// });
+// Or if they have the class "draggable"
+// document.addEventListener('DOMContentLoaded', () => {
+//     document.querySelectorAll('.draggable').forEach(item => {
+//         // You might want to check if it's an image or the element you intend
+//         makeDraggable(item);
+//     });
+// });

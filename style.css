@@ -1,9 +1,13 @@
+/* --- General Layout --- */
 body {
-  background-color: #1f512f;
+  background-color: #1f512f; /* Dark green for surrounding area */
   display: flex;
   justify-content: center;
+  align-items: center; /* Center vertically */
   padding: 20px;
   margin: 0;
+  min-height: 100vh; /* Ensure full viewport height */
+  /* font-family: sans-serif; */ /* Optional: Add a default font */
 }
 
 .placemat {
@@ -11,96 +15,176 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  width: 100%;
+  max-width: 1200px; /* Limit width for larger screens */
+  /* overflow-x: auto; */ /* Consider if needed, may clip fixed elements */
 }
 
+/* --- Grids (Example) --- */
 .top-grid, .bottom-grid {
   display: grid;
-  grid-template-columns: repeat(6, 60px);
+  /* Updated grid definition for flexibility */
+  grid-template-columns: repeat(11, minmax(50px, 1fr));
   gap: 5px;
+  width: 100%; /* Take available width */
+  padding: 10px;
+  background-color: rgba(0,0,0,0.1); /* Example background */
+  border-radius: 5px;
 }
 
+/* --- Baseball Field Area (Improved) --- */
 .field-area {
-  position: relative;
-  width: 300px;
-  height: 300px;
-  background-color: #347c3c;
-  border: 3px solid #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: relative; /* Context for absolute positioning */
+  width: 600px;
+  height: 600px;
+  background: #a0522d; /* Base color - can be dirt or warning track */
+  border: 4px solid #ffffff; /* White border for field edge */
+  border-radius: 15px; /* Slightly softer corners */
+  overflow: hidden; /* Clip elements extending outside */
 }
 
+/* Optional: Warning track using its own div */
+.warning-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #6d4c41; /* Dirt warning track */
+  /* This shape creates a border inside the main field area */
+  clip-path: polygon(
+    0% 0%, 100% 0%, /* Top edge */
+    100% 35%, /* Right edge start curve */
+    60% 95%, /* Bottom right point */
+    50% 100%, /* Bottom center point */
+    40% 95%, /* Bottom left point */
+    0% 35% /* Left edge start curve */
+  );
+  z-index: 1; /* Below grass */
+  /* Removed opacity: 0.8 from original, assuming solid color is desired */
+}
+
+
+/* Outfield grass shape using pseudo-element */
+.field-area::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Realistic grass gradient */
+  background: radial-gradient(ellipse at 50% 100%, #4caf50 30%, #2e7d32 70%, #1b5e20 95%);
+  /* Fan-shaped outfield grass area */
+   clip-path: polygon(
+    0% 0%, 100% 0%, /* Top edge */
+    100% 40%, /* Right edge start curve */
+    55% 90%, /* Bottom right point */
+    50% 95%, /* Bottom center point */
+    45% 90%, /* Bottom left point */
+    0% 40% /* Left edge start curve */
+  );
+  z-index: 2; /* Above warning track, below infield/lines */
+}
+
+/* Infield diamond */
 .diamond {
   position: absolute;
-  width: 200px;
-  height: 200px;
-  background-color: #FFA500;
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, #b98a65, #a0522d); /* Lighter dirt infield */
   transform: rotate(45deg);
-  z-index: 1;
+  /* Center the diamond (Field 600x600, Diamond 300x300) */
+  top: 150px;
+  left: 150px;
+  z-index: 3; /* Above grass */
+  border: 1px solid #6d4c41; /* Subtle dirt edge */
 }
+
+/* Base paths */
+.base-path {
+    position: absolute;
+    background-color: #8b5a2b; /* Darker dirt for paths */
+    z-index: 4; /* Above diamond dirt, below bases */
+}
+
+/* Foul lines */
+.foul-line {
+  position: absolute;
+  width: 3px; /* Line thickness */
+  height: 450px; /* Length - extend past infield */
+  background-color: #ffffff;
+  bottom: 100px; /* Start below home plate center */
+  left: 298.5px; /* Center horizontally */
+  transform-origin: bottom center; /* Rotate around home plate point */
+  z-index: 5; /* Above diamond/paths, below bases */
+}
+.foul-line.left {
+  transform: rotate(-45deg);
+}
+.foul-line.right {
+  transform: rotate(45deg);
+}
+
 
 /* Bases */
 .base {
   position: absolute;
-  width: 25px;
-  height: 25px;
-  background-color: white;
-  transform: rotate(45deg);
-  z-index: 2;
+  background-color: #f5f5f5; /* Worn base color */
+  z-index: 6; /* Above paths and lines */
+  border: 1px solid #d3d3d3;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* Position each base */
+/* Home plate - Pentagon Shape */
 #home {
-  bottom: 10px;
-  left: 137px;
+  width: 25px; height: 25px;
+  bottom: 85px; /* Position adjusted for non-rotated shape */
+  left: 287.5px; /* Center horizontally (600/2 - 25/2) */
+  clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 50% 100%, 0% 50%);
+  background-color: #ffffff; /* Typically brighter white */
+  /* Note: No transform: rotate(45deg) needed */
 }
 
-#first {
-  bottom: 137px;
-  right: 10px;
+/* Other bases - Square rotated */
+#first, #second, #third {
+  width: 20px; height: 20px;
+  transform: rotate(45deg);
 }
+#first { top: 290px; left: 480px; } /* Right corner */
+#second { top: 100px; left: 290px; } /* Top corner */
+#third { top: 290px; left: 100px; } /* Left corner */
 
-#second {
-  top: 10px;
-  left: 137px;
-}
 
-#third {
-  bottom: 137px;
-  left: 10px;
-}
-
-/* Mound */
+/* Pitcher’s mound */
 .mound {
   position: absolute;
-  width: 30px;
-  height: 30px;
-  background-color: #cc7722;
+  width: 50px; height: 50px;
+  background: radial-gradient(circle, #a86a3d 20%, #8b5a2b 70%); /* Worn dirt center */
   border-radius: 50%;
-  top: 135px;
-  left: 135px;
-  z-index: 3;
+  /* Center roughly between home and second */
+  top: 275px; left: 275px; /* Center position (300 - 50/2) */
+  z-index: 7; /* Highest element on field */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Raised effect */
 }
 
-/* Dice Rollers */
+
+/* --- Other UI Elements (Dice, Squares, Button - Unchanged) --- */
 .dice-container {
   position: fixed;
-  top: 20px; /* Adjust this value for vertical position */
+  top: 20px;
   text-align: center;
-  z-index: 10; /* Ensure the dice rollers are above other content */
+  z-index: 10; /* Ensure dice are above field */
 }
 
-/* Home dice (left side) */
 #dice1-container {
-  left: 20px; /* Left side for Home dice */
+  left: 20px;
 }
 
-/* Away dice (right side) */
 #dice2-container {
-  right: 20px; /* Right side for Away dice */
+  right: 20px;
 }
 
-/* Optional: Add a label for Home and Away */
 .dice-label {
   font-size: 16px;
   font-weight: bold;
@@ -108,19 +192,12 @@ body {
   margin-bottom: 10px;
 }
 
-#dice1 {
+#dice1, #dice2 {
   width: 100px;
   cursor: pointer;
   transition: transform 0.5s ease;
 }
 
-#dice2 {
-  width: 100px;
-  cursor: pointer;
-  transition: transform 0.5s ease;
-}
-
-/* Rolling animation */
 #dice1.rolling, #dice2.rolling {
   animation: spin 0.5s linear infinite;
 }
@@ -137,18 +214,21 @@ body {
   color: white;
 }
 
-/* Squares */
 .blue-square, .red-square, .center-square {
-  width: 60px;
-  height: 60px;
-  background-color: #347c3c;
+  width: 100px;
+  height: 100px;
+  /* Original background: #347c3c - Consider if this should change if they overlay field */
+  background-color: #347c3c; /* Keeping original color */
   border: 2px solid #fff;
   display: flex;
   justify-content: center;
   align-items: center;
   color: white;
   font-weight: bold;
+  font-size: 24px;
   overflow: hidden;
+  /* Add position: absolute; top: ...; left: ...; if these are meant to be placed on the placemat/field */
+  /* Add z-index if they need specific layering relative to field */
 }
 
 .blue-square img, .red-square img, .center-square img {
@@ -156,28 +236,75 @@ body {
   max-height: 100%;
 }
 
+/* --- Draggable Image Styles --- */
+
+/* Base style for all draggable images (Off-field size) */
+.draggable-image {
+  cursor: grab;         /* Indicate it's draggable */
+  max-width: 100px;     /* Default OFF-FIELD max width */
+  max-height: 100px;    /* Default OFF-FIELD max height */
+  width: auto;          /* Allow image to shrink if needed */
+  height: auto;         /* Maintain aspect ratio */
+  transition: max-width 0.2s ease, max-height 0.2s ease; /* Smooth size change */
+  /* Add other necessary styles like display, maybe position if needed */
+  display: block; /* Or inline-block depending on layout */
+}
+
+/* Style for when the image IS on the field */
+.draggable-image.on-field {
+  max-width: 200px;     /* ON-FIELD max width */
+  max-height: 200px;    /* ON-FIELD max height */
+  /* Position might be needed if you freely place items on the field */
+  /* position: absolute; */
+  /* z-index: 8; */ /* Ensure it's above field elements but below UI like dice */
+}
+
+/* Optional: Style while the image is being actively dragged */
+.draggable-image.dragging {
+  opacity: 0.6;      /* Make it semi-transparent */
+  cursor: grabbing;  /* Change cursor during drag */
+}
+
+/* You might need to adjust the existing .draggable class if it conflicts */
+/* Or ensure your draggable images also have the .draggable-image class */
+
+/* Example: If your existing .draggable applies to the images */
 .draggable {
-  max-width: 60px;
-  max-height: 60px;
   cursor: grab;
+  transition: max-width 0.2s ease, max-height 0.2s ease;
+  display: block; /* Or inline-block */
+  width: auto;
+  height: auto;
+
+  /* Default (Off-field) size */
+  max-width: 100px;
+  max-height: 100px;
 }
 
-.field-area {
-  position: relative;
-  width: 300px;
-  height: 300px;
-  background-color: #347c3c;
-  border: 3px solid #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.draggable.on-field {
+  /* On-field size */
+  max-width: 200px;
+  max-height: 200px;
+  /* position: absolute; */
+  /* z-index: 8; */
 }
 
-.diamond {
-  position: absolute;
-  width: 200px;
-  height: 200px;
-  background-color: #FFA500;
-  transform: rotate(45deg);
-  z-index: 1;
+.draggable.dragging {
+   opacity: 0.6;
+   cursor: grabbing;
+}
+
+.start-new-game {
+  background-color: purple;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  position: fixed;
+  top: 20px;
+  /* Add left or right positioning */
+  /* Example: Center it horizontally */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10; /* Ensure button is above field */
 }
