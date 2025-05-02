@@ -333,18 +333,31 @@ body {
     padding-bottom: 5px;
 }
 
-/* Draggable Images */
-.draggable-image {
-  cursor: grab;
-  max-width: 100px;
-  max-height: 100px;
-  transition: max-width 0.2s ease, max-height 0.2s ease;
-  display: block;
+/* Ensure images *in* spots are at their base size and not scaled */
+.spot .draggable-image {
+  max-width: 100%; /* Ensure it fits within the spot */
+  max-height: 100%;
+  transform: scale(1); /* Reset any scaling */
+  transition: transform 0.2s ease-in-out; /* Match transition for smoothness */
+  display: block; /* Helps with positioning */
 }
 
+/* Adjust the base size of the image if needed */
+.draggable-image {
+  cursor: grab;
+  max-width: 50px; /* Example base size - adjust to fit your spots */
+  max-height: 50px; /* match width to keep square */
+  transition: max-width 0.2s ease, max-height 0.2s ease; /* smooth transition for size changes */
+  display: block; /* helps with positioning */
+}
+
+/* CSS to make images larger when they are on the playing field (or outside a spot) */
 .draggable-image.on-field {
-  max-width: 300px;
-  max-height: 300px;
+  /* Adjust the scale factor as needed (e.g., 1.2 for 120%, 1.5 for 150%) */
+  max-width: 150px; /* scaled up from 50px */
+  max-height: 150px;
+  transform: scale(1); /* remove scale, since max-width/height are set */
+  transition: max-width 0.2s ease, max-height 0.2s ease; /* Optional: Add a smooth transition effect for the size change */
 }
 
 .draggable-image.dragging {
