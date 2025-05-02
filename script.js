@@ -900,3 +900,29 @@ if (copyUrlButtonOnLoad) {
 
 // This final empty if block from your original script can be removed, it does nothing.
 // if (gameId) { }
+
+// !! WARNING: This is NOT SECURE for protecting paid content !!
+// Anyone can view the page source and find the password.
+
+const correctPassword = "MLBSHOWDOWN"; // <-- This password is visible in source code!
+const pageContent = document.body; // Or select a specific div containing your game content
+
+// Hide content initially using CSS (e.g., body { display: none; } initially in CSS, then JS changes it)
+// Or set the style here
+if (pageContent) {
+    pageContent.style.display = 'none'; // Hide the entire body or main container
+
+    const enteredPassword = prompt("Please enter the password to access this game:");
+
+    if (enteredPassword === correctPassword) {
+        pageContent.style.display = ''; // Or 'block', 'flex', etc. - show the content
+        console.log("Password correct. Access granted.");
+        // Optional: Use localStorage or sessionStorage to remember the user for the session
+        // Optional: Redirect to the actual game URL without the prompt if you have a landing page
+    } else {
+        alert("Incorrect password. Access denied.");
+        // Optional: Redirect to an error page or just leave the content hidden
+        // window.location.href = "https://yourusername.github.io/your-repo/access-denied.html";
+    }
+}
+// End of Insecure Example
