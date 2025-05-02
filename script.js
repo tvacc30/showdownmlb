@@ -909,7 +909,7 @@ function makeDraggable(element) {
                 console.log(`makeDraggable onmousedown: Dragging image ${imageId} from spot: ${originalSpotId}`);
                  // Remove the image from its spot HTML immediately on drag start
                  // It will be re-added to body below for free movement
-                 originalParent.removeChild(element);
+                 // originalParent.removeChild(element);
                  console.log(`makeDraggable onmousedown: Removed element ${imageId} from spot ${originalSpotId}.`);
                  // When removing from a spot during drag, mark it as not being in a spot in the map?
                  // Or just let the listener handle the map update based on Firebase state.
