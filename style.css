@@ -282,8 +282,8 @@ body {
 
 /* Common styles for all individual spots remain the same */
 .spot {
-  width: 100px; /* Keep this size, it's for the spots in the lineup/bench grids */
-  height: 100px;
+  width: 150px; /* Keep this size, it's for the spots in the lineup/bench grids */
+  height: 150px;
   border: 2px solid;
   display: flex;
   justify-content: center;
@@ -345,8 +345,8 @@ body {
 /* Adjust the base size of the image if needed */
 .draggable-image {
   cursor: grab;
-  max-width: 50px; /* Example base size - adjust to fit your spots */
-  max-height: 50px; /* match width to keep square */
+  max-width: 150px; /* Example base size - adjust to fit your spots */
+  max-height: 150px; /* match width to keep square */
   transition: max-width 0.2s ease, max-height 0.2s ease; /* smooth transition for size changes */
   display: block; /* helps with positioning */
 }
@@ -566,4 +566,46 @@ button[data-action="next-inning"] {
 button[data-action="next-inning"]:hover {
     background-color: #218838;
     border-color: #1e7e34;
+}
+/* Modify this CSS rule in your stylesheet */
+.draggable-image:hover:not(.dragging) {
+  /* Scale the image up on hover ONLY if it does NOT have the .dragging class */
+  transform: scale(2.5); /* Adjust the scale factor for desired zoom */
+  cursor: zoom-in; /* Optional: Change cursor on hover when zoom is active */
+}
+
+/* Keep the base .draggable-image styles and transitions as before */
+.draggable-image {
+  cursor: grab;
+  max-width: 150px; /* Example base size */
+  max-height: 150px;
+  /* Add/Keep transitions */
+  transition: max-width 0.2s ease, max-height 0.2s ease, transform 0.2s ease-in-out;
+  display: block;
+  box-sizing: border-box;
+  /* The base transform should be 1 (no scale) */
+  transform: scale(1); /* Ensure base scale is 1 */
+}
+
+/* Keep the .spot .draggable-image styles */
+.spot .draggable-image {
+    max-width: 100%;
+    max-height: 100%;
+    /* The base transform should be 1 here too */
+    transform: scale(1);
+    transition: transform 0.2s ease-in-out; /* Keep the transform transition */
+    /* Adjust pointer-events if needed, but pointer-events: none on the image */
+    /* and hover on the container is generally simpler with drag/drop */
+}
+
+/* Ensure that when it HAS the dragging class, the scale is explicitly 1 */
+/* This might help prevent odd behavior if dragging class is added/removed quickly */
+.draggable-image.dragging {
+    /* Existing styles like opacity, cursor: grabbing */
+    opacity: 0.6;
+    cursor: grabbing;
+    /* Explicitly set scale back to 1 when dragging */
+    transform: scale(1);
+    /* Keep the transition so it smoothly scales back down */
+    transition: transform 0.2s ease-in-out;
 }
