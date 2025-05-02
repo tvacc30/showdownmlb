@@ -7,7 +7,9 @@ body {
   padding: 0; /* Adjust padding as full-width containers might add their own */
   margin: 0;
   min-height: 100vh; /* Ensure full viewport height */
-  /* font-family: sans-serif; */ /* Optional: Add a default font */
+  font-family: sans-serif; /* Optional: Add a default font */
+  /* Prevent unwanted overflow if content exceeds viewport */
+  overflow-x: hidden;
 }
 
 /* New containers for full-width lineups */
@@ -15,9 +17,9 @@ body {
 .bottom-lineup-area {
     width: 100%; /* Take full width */
     max-width: 100%; /* Ensure no max-width constraint */
-    padding: 20px; /* Add some internal padding */
+    padding: 10px; /* Add some internal padding - adjusted */
     box-sizing: border-box; /* Include padding in the element's total width */
-    /* Add background or other styling if desired for these areas */
+    text-align: center; /* Center headings and flex containers within */
 }
 
 /* Keep placemat for the field area and anything else meant to be centered/width-constrained */
@@ -25,51 +27,56 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  /* Removed gap here, rely on margins/padding on children */
+  gap: 0;
   width: 100%;
-  max-width: 1200px; /* Limit width for the central content */
-  /* Remove padding and margin if they were causing issues with full-width areas */
+  /* Let the field's vmin size determine the maximum effective width,
+     but add a max-width just in case on huge screens. */
+  max-width: 1300px; /* Slightly larger than field max size */
   padding: 0;
-  margin: 20px auto; /* Center the placemat horizontally and add vertical space */
-  /* overflow-x: auto; */
+  margin: 10px auto; /* Center the placemat horizontally and add vertical space - adjusted */
+  /* overflow-x: auto; */ /* Consider adding this back if horizontal scrolling is needed */
 }
 
 /* --- Grids (Example) --- */
 /* These grids are inside the new full-width containers, their width: 100%
-   will make them span the container width. */
-.top-grid, .bottom-grid {
+     will make them span the container width. */
+/* Removed this block as you have specific .lineup-grid, .bench-grid, .pitcher-grid below */
+/* .top-grid, .bottom-grid {
   display: grid;
   grid-template-columns: repeat(11, minmax(50px, 1fr));
   gap: 5px;
-  width: 100%; /* Take available width of their new parent container */
+  width: 100%;
   padding: 10px;
-  background-color: rgba(0,0,0,0.1); /* Example background */
+  background-color: rgba(0,0,0,0.1);
   border-radius: 5px;
-}
+} */
 
-/* --- Baseball Field Area (Improved) --- */
+/* --- Baseball Field Area (Improved & Scalable) --- */
 .field-area {
   position: relative; /* Crucial for positioning children (scoreboard/controls) */
-  /* Keep your desired field size, e.g., 1200x1200 from previous step */
-  width: 1200px;
-  height: 1200px;
+  /* **SCALING FIX:** Use vmin for responsive size */
+  width: 90vmin; /* Field width is 90% of the smaller viewport dimension */
+  height: 90vmin; /* Field height is 90% of the smaller viewport dimension */
+
   background: #a0522d; /* Base color - can be dirt or warning track */
-  border: 8px solid #ffffff; /* White border for field edge */
-  border-radius: 30px; /* Slightly softer corners */
+  /* **SCALING FIX:** Use relative units for border if desired to scale, or keep px */
+  border: 0.5vmin solid #ffffff; /* White border scaled with field */
+  border-radius: 2vmin; /* Border radius scaled with field */
   overflow: hidden; /* Clip elements extending outside */
-  /* Adjusted margin now that placemat handles centering */
-  margin: 0; /* Remove margin from the field area itself */
+  margin: 0 auto; /* Center the field area within the placemat */
+  box-sizing: border-box; /* Include border in element's total size */
 }
 
-/* Optional: Warning track using its own div */
+/* Optional: Warning track using its own div - clip-path scales with parent */
 .warning-track {
   position: absolute;
-  top: 0; /* Keep 0, relative to parent */
-  left: 0; /* Keep 0, relative to parent */
-  width: 100%; /* Keep 100%, relative to parent */
-  height: 100%; /* Keep 100%, relative to parent */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: #6d4c41; /* Dirt warning track */
-  /* Clip path uses percentages, scales proportionally */
+  /* clip-path uses percentages, scales proportionally relative to field-area */
   clip-path: polygon(
     0% 0%, 100% 0%, /* Top edge */
     100% 35%, /* Right edge start curve */
@@ -82,17 +89,17 @@ body {
 }
 
 
-/* Outfield grass shape using pseudo-element */
+/* Outfield grass shape using pseudo-element - clip-path scales with parent */
 .field-area::before {
   content: '';
   position: absolute;
-  top: 0; /* Keep 0, relative to parent */
-  left: 0; /* Keep 0, relative to parent */
-  width: 100%; /* Keep 100%, relative to parent */
-  height: 100%; /* Keep 100%, relative to parent */
-  /* Realistic grass gradient - uses percentages, scales */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Realistic grass gradient - scales */
   background: radial-gradient(ellipse at 50% 100%, #4caf50 30%, #2e7d32 70%, #1b5e20 95%);
-  /* Fan-shaped outfield grass area - uses percentages, scales */
+  /* Fan-shaped outfield grass area - clip-path uses percentages, scales */
     clip-path: polygon(
     0% 0%, 100% 0%, /* Top edge */
     100% 40%, /* Right edge start curve */
@@ -104,44 +111,46 @@ body {
   z-index: 2; /* Above warning track, below infield/lines */
 }
 
-/* Infield diamond */
+/* Infield diamond - **SCALING FIX:** Use percentages for size and position */
 .diamond {
   position: absolute;
-  /* Original: width: 300px; height: 300px; */
-  width: 600px; /* Increased by 100% (x2) */
-  height: 600px; /* Increased by 100% (x2) */
+  /* Original: width: 600px; height: 600px; */
+  width: 50%; /* 600px / 1200px = 50% */
+  height: 50%; /* 600px / 1200px = 50% */
   background: linear-gradient(135deg, #b98a65, #a0522d); /* Lighter dirt infield */
   transform: rotate(45deg); /* Keep rotation */
-  /* Original: top: 150px; left: 150px; (Centered on 600x600) */
-  /* New center on 1200x1200: top 300, left 300 */
-  top: 300px; /* Increased by 100% (x2) */
-  left: 300px; /* Increased by 100% (x2) */
+  /* Original: top: 300px; left: 300px; */
+  /* Positioning relative to field area */
+  top: 25%; /* 300px / 1200px = 25% */
+  left: 25%; /* 300px / 1200px = 25% */
   z-index: 3; /* Above grass */
-  /* Original: border: 1px solid #6d4c41; */
-  border: 2px solid #6d4c41; /* Increased border thickness */
+  /* **SCALING FIX:** Use relative units for border */
+  border: 0.15vmin solid #6d4c41; /* Border thickness scaled */
 }
 
-/* Base paths - Need to be added/positioned */
-/* This block is kept as a placeholder, specific positioning depends on how paths are implemented */
+/* Base paths - Need to be added/positioned - **SCALING FIX:** Use percentages */
+/* This block is kept as a placeholder, specific positioning/sizing depends on implementation */
 .base-path {
     position: absolute;
     background-color: #8b5a2b; /* Darker dirt for paths */
     z-index: 4; /* Above diamond dirt, below bases */
-    /* Specific positioning (top, left, width, height) needed for each path segment, scaled by 2x */
+    /* Specific positioning (top, left, width, height) needed for each path segment, using percentages */
+    /* Example (unverified exact path positions): */
+    /* &.#home-first { top: 80%; left: 48%; width: 4%; height: 10%; transform: rotate(-45deg); transform-origin: top left;} */
 }
 
-/* Foul lines */
+/* Foul lines - **SCALING FIX:** Use percentages for size and position */
 .foul-line {
   position: absolute;
-  /* Original width: 3px; */
-  width: 6px; /* Line thickness (Increased by 100% (x2)) */
-  /* Original height: 450px; */
-  height: 900px; /* Length - extend past infield (Increased by 100% (x2)) */
+  /* Original width: 6px; */
+  width: 0.5%; /* 6px / 1200px = 0.5% */
+  /* Original height: 900px; */
+  height: 75%; /* 900px / 1200px = 75% */
   background-color: #ffffff;
-  /* Original bottom: 100px; */
-  bottom: 200px; /* Start below home plate center (Increased by 100% (x2)) */
-  /* Original left: 298.5px; */
-  left: 597px; /* Center horizontally (Increased by 100% (x2)) */
+  /* Original bottom: 200px; */
+  bottom: 16.67%; /* 200px / 1200px = 16.67% */
+  /* Original left: 597px; */
+  left: 49.75%; /* 597px / 1200px ≈ 49.75% (center) */
   transform-origin: bottom center; /* Keep origin */
   z-index: 5; /* Above diamond/paths, below bases */
 }
@@ -153,70 +162,76 @@ body {
 }
 
 
-/* Bases */
+/* Bases - **SCALING FIX:** Use percentages for size and position, relative units for border/shadow */
 .base {
   position: absolute;
   background-color: #f5f5f5; /* Worn base color */
   z-index: 6; /* Above paths and lines */
-  /* Original: border: 1px solid #d3d3d3; */
-  border: 2px solid #d3d3d3; /* Increased border thickness */
-  /* Original: box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); */
-  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2); /* Increased shadow values */
+  /* **SCALING FIX:** Use relative units for border and shadow */
+  border: 0.15vmin solid #d3d3d3;
+  box-shadow: 0.2vmin 0.2vmin 0.5vmin rgba(0, 0, 0, 0.2);
 }
 
-/* Home plate - Pentagon Shape */
+/* Home plate - Pentagon Shape - **SCALING FIX:** Use percentages for size and position */
 #home {
-  /* Original: width: 25px; height: 25px; */
-  width: 50px; height: 50px; /* Increased by 100% (x2) */
-  /* Original bottom: 85px; */
-  bottom: 170px; /* Position adjusted (Increased by 100% (x2)) */
-  /* Original left: 287.5px; */
-  left: 575px; /* Center horizontally (Increased by 100% (x2)) */
-  clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 50% 100%, 0% 50%); /* Keep shape */
+  /* Original: width: 50px; height: 50px; */
+  width: 4.17%; /* 50px / 1200px ≈ 4.17% */
+  height: 4.17%; /* 50px / 1200px ≈ 4.17% */
+  /* Original bottom: 170px; */
+  bottom: 14.17%; /* 170px / 1200px ≈ 14.17% */
+  /* Original left: 575px; */
+  left: 47.9%; /* 575px / 1200px ≈ 47.9% (Center +/- half its width) */
+  clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 50% 100%, 0% 50%); /* Keep shape - percentages scale */
   background-color: #ffffff; /* Typically brighter white */
   /* Note: No transform: rotate(45deg) needed */
+  box-sizing: border-box; /* Include border/padding in size */
 }
 
-/* Other bases - Square rotated */
+/* Other bases - Square rotated - **SCALING FIX:** Use percentages for size and position */
 #first, #second, #third {
-  /* Original: width: 20px; height: 20px; */
-  width: 40px; height: 40px; /* Increased by 100% (x2) */
+  /* Original: width: 40px; height: 40px; */
+  width: 3.33%; /* 40px / 1200px ≈ 3.33% */
+  height: 3.33%; /* 40px / 1200px ≈ 3.33% */
   transform: rotate(45deg); /* Keep rotation */
+  box-sizing: border-box; /* Include border/padding in size */
 }
-/* Original positions on 600x600 field: */
-/* #first: top: 290px; left: 480px; */
-/* #second: top: 100px; left: 290px; */
-/* #third: top: 290px; left: 100px; */
+/* Original positions on 1200x1200 field (after scaling from 600x600): */
+/* #first: top: 580px; left: 960px; */
+/* #second: top: 200px; left: 580px; */
+/* #third: top: 580px; left: 200px; */
 
 #first {
-    top: 580px; /* Increased by 100% (x2) */
-    left: 960px; /* Increased by 100% (x2) */
+    top: 48.33%; /* 580px / 1200px ≈ 48.33% */
+    left: 80%; /* 960px / 1200px = 80% */
 }
 #second {
-    top: 200px; /* Increased by 100% (x2) */
-    left: 580px; /* Increased by 100% (x2) */
+    top: 16.67%; /* 200px / 1200px ≈ 16.67% */
+    left: 48.33%; /* 580px / 1200px ≈ 48.33% */
 }
 #third {
-    top: 580px; /* Increased by 100% (x2) */
-    left: 200px; /* Increased by 100% (x2) */
+    top: 48.33%; /* 580px / 1200px ≈ 48.33% */
+    left: 16.67%; /* 200px / 1200px ≈ 16.67% */
 }
 
 
-/* Pitcher’s mound */
+/* Pitcher’s mound - **SCALING FIX:** Use percentages for size and position, relative units for shadow */
 .mound {
   position: absolute;
-  /* Original: width: 50px; height: 50px; */
-  width: 100px; height: 100px; /* Increased by 100% (x2) */
+  /* Original: width: 100px; height: 100px; */
+  width: 8.33%; /* 100px / 1200px ≈ 8.33% */
+  height: 8.33%; /* 100px / 1200px ≈ 8.33% */
   background: radial-gradient(circle, #a86a3d 20%, #8b5a2b 70%); /* Worn dirt center */
   border-radius: 50%; /* Keep round */
-  /* Original: top: 275px; left: 275px; */
-  /* Center roughly between home and second - will be scaled */
-  top: 550px; /* Increased by 100% (x2) */
-  left: 550px; /* Increased by 100% (x2) */
+  /* Original: top: 550px; left: 550px; */
+  /* Position center relative to field */
+  top: 45.83%; /* 550px / 1200px ≈ 45.83% */
+  left: 45.83%; /* 550px / 1200px ≈ 45.83% */
   z-index: 7; /* Highest element on field */
-  /* Original: box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Increased shadow values */
+  /* **SCALING FIX:** Use relative units for shadow */
+  box-shadow: 0 0.3vmin 0.8vmin rgba(0, 0, 0, 0.3);
+  box-sizing: border-box; /* Include border/padding in size */
 }
+
 
 /* --- Other UI Elements (Dice, Squares/Spots, Button) --- */
 
@@ -350,50 +365,60 @@ body {
   z-index: 10; /* Ensure button is above everything */
 }
 
-/* --- Scoreboard and Controls (Moved Inside Field) --- */
+/* --- Scoreboard and Controls (Positioned Inside Scaled Field) --- */
 
 /* Scoreboard Container */
 .scoreboard-container {
-  /* Remove flow/margin positioning */
-  /* margin: 20px auto; */
   position: absolute; /* Position relative to .field-area */
-  /* Example placement: Top Right corner inside the field */
-  top: 800px;
-  right: 20px;
+  /* **SCALING FIX:** Position relative to scaled field */
+  /* Adjusted top position to potentially give more space above controls */
+  top: 1%; /* Positioned relative to the field height */
+  right: 60%; /* Positioned relative to the field width */
   z-index: 9; /* Above field elements (7, 8) but below fixed UI (10) */
 
-  /* Adjust size and internal padding to fit within the field */
-  width: 450px; /* Set a width to fit */
-  max-width: none; /* Override previous max-width */
+  /* **SCALING FIX:** Use percentages for width and add max-width */
+  /* **ADJUSTMENT:** Made width and max-width smaller */
+  width: 35%; /* Width is 30% of the field width (Reduced from 35%) */
+  max-width: 300px; /* But don't exceed a reasonable pixel size (Reduced from 350px) */
+
   background-color: #f0f0f0; /* Light background */
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 10px; /* Reduced padding */
+  /* **SCALING FIX:** Use relative units for border/radius/padding */
+  border: 0.1vmin solid #ccc;
+  border-radius: 0.8vmin;
+  padding: 1vmin; /* Scaled padding */
   text-align: center;
+  box-sizing: border-box; /* Include border/padding in size */
+
+   /* Add margin-bottom for space BETWEEN scoreboard and controls if they stack vertically */
+   /* If controls are directly below the scoreboard within the field, this helps separate them */
+   margin-bottom: 1vmin; /* Add space below scoreboard container */
 }
 
 .scoreboard-container h2 {
   color: #333;
   margin-top: 0;
-  margin-bottom: 10px; /* Reduced margin */
-  font-size: 18px; /* Reduced font size */
+  margin-bottom: 1vmin; /* Scaled margin */
+  font-size: 2vmin; /* Scaled font size */
 }
 
 /* Scoreboard Table */
 .baseball-scoreboard {
   border-collapse: collapse;
-  margin: 0 auto 10px auto; /* Center table, reduced margin */
+  margin: 0 auto 1vmin auto; /* Center table, scaled margin below */
   font-family: Arial, sans-serif;
-  font-size: 12px; /* Reduced font size */
+  /* **SCALING FIX:** Use relative units for font size */
+  font-size: 1.5vmin; /* Scaled font size */
   width: 100%; /* Take container width */
 }
 
 .baseball-scoreboard th,
 .baseball-scoreboard td {
-  border: 1px solid #aaa;
-  padding: 4px 3px; /* Reduced padding */
+  /* **SCALING FIX:** Use relative units for padding */
+  border: 0.1vmin solid #aaa; /* Scaled border */
+  padding: 0.4vmin 0.3vmin; /* Scaled padding */
   text-align: center;
-  min-width: 18px; /* Reduced min width for inning cells */
+  /* **SCALING FIX:** Use relative units for min-width */
+  min-width: 1.8vmin; /* Scaled min width for inning cells */
 }
 
 .baseball-scoreboard thead th {
@@ -413,7 +438,7 @@ body {
   text-align: left;
   font-weight: bold;
   background-color: #e9e9e9;
-  min-width: 60px; /* Reduced min width */
+  min-width: 6vmin; /* Scaled min width */
 }
 
 /* Total Columns (R, H, E) */
@@ -434,11 +459,21 @@ body {
   font-weight: bold;
 }
 
-/* Game State Info (Inning, Outs) */
+/* Game State Info (Inning, Outs, Half Inning) */
 .game-state {
-  margin-top: 10px; /* Reduced margin */
-  font-size: 14px; /* Reduced font size */
+  margin-top: 1vmin; /* Scaled margin */
+  font-size: 1.8vmin; /* Scaled font size */
   color: #555;
+  /* Added display flex to make inning/outs/half-inning line up better */
+  display: flex;
+  justify-content: center;
+  gap: 1.5vmin; /* Spacing between info */
+  flex-wrap: wrap; /* Allow wrapping on very small screens */
+}
+
+.game-state p {
+    margin: 0;
+    padding: 0;
 }
 
 .game-state span {
@@ -448,44 +483,52 @@ body {
 
 /* Scoreboard Controls */
 .scoreboard-controls {
-  /* Remove flow/margin positioning */
-  /* margin: 20px auto; */
   position: absolute; /* Position relative to .field-area */
-  /* Example placement: Bottom Right corner inside the field */
-  bottom: 20px;
-  right: 20px;
+  /* **SCALING FIX:** Position relative to scaled field */
+  bottom: 2%; /* Positioned relative to the field height */
+  right: 80%; /* Positioned relative to the field width */
   z-index: 9; /* Above field elements (7, 8) but below fixed UI (10) */
 
-  /* Adjust size and internal padding to fit within the field */
-  width: 450px; /* Match scoreboard width */
-  max-width: none; /* Override previous max-width */
-  padding: 10px; /* Reduced padding */
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  /* **SCALING FIX:** Use percentages for width and add max-width */
+  /* **ADJUSTMENT:** Match width and max-width of scoreboard container */
+  width: 20%; /* Width is 30% of the field width (Reduced from 35%) */
+  max-width: 300px; /* But don't exceed a reasonable pixel size (Reduced from 350px) */
+
+  /* **SCALING FIX:** Use relative units for border/radius/padding */
+  padding: 1vmin; /* Scaled padding */
+  border: 0.1vmin solid #ccc;
+  border-radius: 0.8vmin;
   background-color: #f9f9f9;
   text-align: center;
+  box-sizing: border-box; /* Include border/padding in size */
 }
 
+/* Styles for elements INSIDE scoreboard-controls remain */
 .scoreboard-controls h4 {
   margin-top: 0;
-  margin-bottom: 10px; /* Reduced margin */
-  font-size: 16px; /* Reduced font size */
+  margin-bottom: 1vmin; /* Scaled margin */
+  font-size: 2vmin; /* Scaled font size */
   color: #333;
 }
 
 .scoreboard-controls .control-row {
-  margin-bottom: 8px; /* Reduced space between rows */
+  margin-bottom: 0.8vmin; /* Scaled space between rows */
+  display: flex; /* Use flexbox for button rows */
+  justify-content: center; /* Center buttons in the row */
+  gap: 0.5vmin; /* Space between buttons */
+  flex-wrap: wrap; /* Allow buttons to wrap */
 }
 
 .scoreboard-controls button {
-  padding: 5px 12px; /* Reduced padding */
-  margin: 0 4px; /* Reduced space between buttons */
+  /* **SCALING FIX:** Use relative units for padding/margin/font size */
+  padding: 0.5vmin 1.2vmin; /* Scaled padding */
+  margin: 0 0.4vmin; /* Scaled space between buttons (adjusting for flex gap) */
   cursor: pointer;
-  border: 1px solid #007bff;
-  border-radius: 5px;
+  border: 0.1vmin solid #007bff; /* Scaled border */
+  border-radius: 0.5vmin; /* Scaled border radius */
   background-color: #007bff;
   color: white;
-  font-size: 12px; /* Reduced font size */
+  font-size: 1.5vmin; /* Scaled font size */
   transition: background-color 0.2s ease;
 }
 
