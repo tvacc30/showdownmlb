@@ -3,14 +3,16 @@ body {
   background-color: #1f512f; /* Dark green for surrounding area */
   display: flex;
   flex-direction: column; /* Stack main areas vertically */
+  justify-content: center; /* Center items vertically */
   align-items: center; /* Center items horizontally */
-  padding: 0; /* Adjust padding as full-width containers might add their own */
+  padding: 0; /* Remove padding */
   margin: 0;
   min-height: 100vh; /* Ensure full viewport height */
-  font-family: sans-serif; /* Optional: Add a default font */
-  /* Prevent unwanted overflow if content exceeds viewport */
-  overflow-x: hidden;
+  font-family: sans-serif; /* Optional: Default font */
+  overflow-x: hidden; /* Prevent horizontal overflow */
+  overflow-y: auto; /* Allow vertical scrolling if needed */
 }
+
 
 /* New containers for full-width lineups */
 .top-lineup-area,
@@ -615,3 +617,87 @@ button[data-action="next-inning"]:hover {
     /* Keep the transition so it smoothly scales back down */
     transition: transform 0.2s ease-in-out;
 }
+/* Strategy Cards */
+
+
+    /* Strategy Bar */
+    .strategy-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+      user-select: none;
+    }
+
+    /* Strategy List Panel */
+    .strategy-list {
+      position: fixed;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #fff;
+      border: 1px solid #333;
+      padding: 20px;
+      border-radius: 12px;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+      min-width: 300px;
+      text-align: center;
+    }
+
+    .strategy-list h3 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 20px;
+      color: #333;
+    }
+
+    /* Circles */
+    .card-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: inline-block;
+      margin: 10px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .red { background-color: #dc3545; }
+    .blue { background-color: #007bff; }
+    .white { background-color: #fff; border: 2px solid #333; }
+
+    /* Hover Image */
+    .card-circle .hover-image {
+      display: none;
+      position: absolute;
+      bottom: 200px;  /* Adjust this value to move it higher towards the middle */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      z-index: 1;
+      transition: transform 0.3s ease;
+    }
+    
+    .card-circle:hover .hover-image {
+      display: block;
+      transform: translateX(-50%) scale(3);  /* Scale it 3x */
+      z-index: 10;  /* Make sure the image is on top when hovered */
+    }
+
+    .card-circle:hover .hover-image {
+      display: block;
+    }
+    

@@ -1346,3 +1346,16 @@ if (pageContent) {
 }
 // End of Insecure Example
 
+function toggleList() {
+    const list = document.getElementById('strategyList');
+    list.style.display = (list.style.display === 'block') ? 'none' : 'block';
+  }
+
+  // Close panel when clicking outside
+  document.addEventListener('click', function(event) {
+    const bar = document.querySelector('.strategy-bar');
+    const list = document.getElementById('strategyList');
+    if (!bar.contains(event.target) && !list.contains(event.target)) {
+      list.style.display = 'none';
+    }
+  });

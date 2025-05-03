@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MLB Showdown Placemat</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
@@ -175,6 +176,38 @@
             </div>
         </div>
     </div>
+
+    <body>
+
+        <!-- Strategy Bar -->
+        <div class="strategy-bar" onclick="toggleList()">Strategy Cards</div>
+      
+        <!-- Strategy List Panel -->
+        <div class="strategy-list" id="strategyList">
+          <h3>Strategy Cards</h3>
+          
+          <!-- 2 Red Circles -->
+          <div class="card-circle red">
+            <img src="https://firebasestorage.googleapis.com/v0/b/showdown-7bc8f.firebasestorage.app/o/8110-409541Fr.jpg?alt=media&token=90d624d2-80c6-4358-93f8-65ff9ecfdfd3" class="hover-image">
+          </div>
+          <div class="card-circle red">
+            <img src="https://firebasestorage.googleapis.com/v0/b/showdown-7bc8f.firebasestorage.app/o/s-l500.webp?alt=media&token=aeb7b229-8565-4799-a153-ce3f158b5d3d" class="hover-image">
+          </div>
+          
+          <!-- 2 Blue Circles -->
+          <div class="card-circle blue">
+            <img src="https://firebasestorage.googleapis.com/v0/b/showdown-7bc8f.firebasestorage.app/o/s-l500%20(1).webp?alt=media&token=672b78ec-b0c4-4ef3-aa52-2124d3510506" class="hover-image">
+          </div>
+          <div class="card-circle blue">
+            <img src="https://firebasestorage.googleapis.com/v0/b/showdown-7bc8f.firebasestorage.app/o/s-l500%20(2).webp?alt=media&token=fa25229d-3ad8-4046-badf-aa0373f287de" class="hover-image">
+          </div>
+          
+          <!-- 1 White Circle -->
+          <div class="card-circle white">
+            <img src="https://firebasestorage.googleapis.com/v0/b/showdown-7bc8f.firebasestorage.app/o/s-l500%20(3).webp?alt=media&token=5a023a4d-a3fc-4471-87f8-a5492c074ba7" class="hover-image">
+          </div>
+      
+        </div>
 
     <input type="file" id="fileInput" style="display:none" accept="image/*">
 
