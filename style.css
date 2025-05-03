@@ -313,12 +313,17 @@ body {
   display: block;
 }
 
-/* Styles for the container grids within lineup areas remain the same */
 .lineup-grid, .bench-grid, .pitcher-grid {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
   flex-wrap: wrap;
+
+  /* Added styles for centering the container */
+  max-width: 1500px; /* Adjust this value as needed */
+  margin-left: auto;
+  margin-right: auto;
+  /* Or shorthand: margin: 0 auto 20px auto; (maintains the 20px bottom margin) */
 }
 
 /* Styles for the main team set containers remain the same */
